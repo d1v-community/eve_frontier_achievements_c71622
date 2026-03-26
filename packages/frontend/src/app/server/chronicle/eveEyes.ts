@@ -1,4 +1,5 @@
-const EVE_EYES_BASE_URL = process.env.EVE_EYES_BASE_URL || 'https://eve-eyes.d0v.xyz'
+const EVE_EYES_BASE_URL =
+  process.env.EVE_EYES_BASE_URL || 'https://eve-eyes.d0v.xyz'
 const EVE_EYES_API_KEY = process.env.EVE_EYES_API_KEY
 const MOVE_CALL_PAGE_SIZE = 100
 const FREE_SCAN_PAGE_LIMIT = 3
@@ -57,6 +58,8 @@ export interface WalletActivitySnapshot {
     networkNodeAnchors: number
     storageUnitAnchors: number
     gateJumps: number
+    turretOps: number
+    assemblyOps: number
   }
   characterId: string | null
   evePackageId: string | null
@@ -146,15 +149,19 @@ const dedupeMoveCalls = (...collections: EveEyesMoveCall[][]) => {
 }
 
 const getLatestTimestamp = (items: EveEyesMoveCall[]) => {
-  return items
-    .map((item) => item.transactionTime || item.createdAt)
-    .filter((value): value is string => typeof value === 'string')
-    .sort((left, right) => right.localeCompare(left))[0] || null
+  return (
+    items
+      .map((item) => item.transactionTime || item.createdAt)
+      .filter((value): value is string => typeof value === 'string')
+      .sort((left, right) => right.localeCompare(left))[0] || null
+  )
 }
 
 const getCharacterId = (items: EveEyesMoveCall[]) => {
   for (const item of items) {
-    const character = item.actionEntities.find((entity) => entity.label === 'character')
+    const character = item.actionEntities.find(
+      (entity) => entity.label === 'character'
+    )
 
     if (character) {
       return character.value
@@ -188,6 +195,8 @@ export const fetchWalletActivitySnapshot = async (
     networkNodeWindow,
     storageUnitWindow,
     gateJumpWindow,
+    turretWindow,
+    assemblyWindow,
   ] = await Promise.all([
     collectMoveCalls({
       senderAddress: walletAddress,
@@ -212,6 +221,14 @@ export const fetchWalletActivitySnapshot = async (
       moduleName: 'gate',
       functionName: 'jump',
     }),
+    collectMoveCalls({
+      senderAddress: walletAddress,
+      moduleName: 'turret',
+    }),
+    collectMoveCalls({
+      senderAddress: walletAddress,
+      moduleName: 'assembly',
+    }),
   ])
 
   const killmailCalls = dedupeMoveCalls(
@@ -222,7 +239,9 @@ export const fetchWalletActivitySnapshot = async (
     killmailCalls,
     networkNodeWindow.items,
     storageUnitWindow.items,
-    gateJumpWindow.items
+    gateJumpWindow.items,
+    turretWindow.items,
+    assemblyWindow.items
   )
 
   return {
@@ -231,32 +250,39 @@ export const fetchWalletActivitySnapshot = async (
       networkNodeAnchors: networkNodeWindow.items.length,
       storageUnitAnchors: storageUnitWindow.items.length,
       gateJumps: gateJumpWindow.items.length,
+      turretOps: turretWindow.items.length,
+      assemblyOps: assemblyWindow.items.length,
     },
     characterId: getCharacterId(gateJumpWindow.items),
     evePackageId: getFirstValue(activityCalls, (item) => item.packageId),
     observedNetwork: getFirstValue(activityCalls, (item) => item.network),
     lastActivityAt: getLatestTimestamp(activityCalls),
-    scanMode:
-      [
-        killmailRegistryWindow.authType,
-        killmailWindow.authType,
-        networkNodeWindow.authType,
-        storageUnitWindow.authType,
-        gateJumpWindow.authType,
-      ].some((authType) => authType !== 'anonymous')
-        ? 'authenticated'
-        : 'preview',
+    scanMode: [
+      killmailRegistryWindow.authType,
+      killmailWindow.authType,
+      networkNodeWindow.authType,
+      storageUnitWindow.authType,
+      gateJumpWindow.authType,
+      turretWindow.authType,
+      assemblyWindow.authType,
+    ].some((authType) => authType !== 'anonymous')
+      ? 'authenticated'
+      : 'preview',
     scanLimitReached:
       killmailRegistryWindow.scanLimitReached ||
       killmailWindow.scanLimitReached ||
       networkNodeWindow.scanLimitReached ||
       storageUnitWindow.scanLimitReached ||
-      gateJumpWindow.scanLimitReached,
+      gateJumpWindow.scanLimitReached ||
+      turretWindow.scanLimitReached ||
+      assemblyWindow.scanLimitReached,
     scannedPages:
       killmailRegistryWindow.scannedPages +
       killmailWindow.scannedPages +
       networkNodeWindow.scannedPages +
       storageUnitWindow.scannedPages +
-      gateJumpWindow.scannedPages,
+      gateJumpWindow.scannedPages +
+      turretWindow.scannedPages +
+      assemblyWindow.scannedPages,
   }
 }
