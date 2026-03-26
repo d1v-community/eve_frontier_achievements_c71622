@@ -3,8 +3,8 @@
   "private": true,
   "version": "0.0.0",
   "scripts": {
-    "build": "lsui move build -d -p ./move/greeting",
-    "test": "lsui move test -d -p ./move/greeting",
+    "build": "sui move build -p ./move/greeting",
+    "test": "sui move test -p ./move/greeting",
     "copy-package-id": "node ./scripts/copy-package-id",
     "localnet:start": "localnet start",
     "localnet:stop": "localnet stop",

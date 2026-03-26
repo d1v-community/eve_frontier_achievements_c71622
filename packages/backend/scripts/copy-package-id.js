@@ -12,7 +12,7 @@ const { homedir } = require("node:os");
 const path = require("node:path");
 const EnvFileWriter = require("env-file-rw").default;
 
-const DEPLOYED_MODULE_NAME = "greeting";
+const DEPLOYED_MODULE_NAME = "medals";
 
 const main = async () => {
   const network = getNetworkFromArgs();
