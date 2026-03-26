@@ -3,6 +3,7 @@ import type { NextConfig } from 'next'
 const nextConfig: NextConfig = {
   reactStrictMode: true,
   transpilePackages: [
+    '@eveworld/ui-components',
     '@mysten/dapp-kit',
     '@mysten/sui.js',
     '@mysten/wallet-standard',

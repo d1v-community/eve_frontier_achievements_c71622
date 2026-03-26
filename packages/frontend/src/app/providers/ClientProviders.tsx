@@ -3,6 +3,7 @@
 import '@mysten/dapp-kit/dist/index.css'
 import '@radix-ui/themes/styles.css'
 import '@suiware/kit/main.css'
+import '@eveworld/ui-components/styles-ui.css'
 import SuiProvider from '@suiware/kit/SuiProvider'
 import { ThemeProvider as NextThemeProvider } from 'next-themes'
 import { ReactNode } from 'react'
@@ -25,11 +26,15 @@ export default function ClientProviders({
   const { networkConfig } = useNetworkConfig()
 
   return (
-    <NextThemeProvider attribute="class">
+    <NextThemeProvider
+      attribute="class"
+      defaultTheme="dark"
+      enableSystem={false}
+    >
       <ThemeProvider>
         <SuiProvider
           customNetworkConfig={networkConfig}
-          defaultNetwork={ENetwork.LOCALNET}
+          defaultNetwork={ENetwork.TESTNET}
           walletAutoConnect={false}
           walletStashedName={APP_NAME}
           themeSettings={themeSettings}
