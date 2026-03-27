@@ -56,6 +56,13 @@ const Header = () => {
                 {link.label}
               </a>
             ))}
+            <NextLink
+              href="/warrior"
+              className="px-3 py-1.5 text-xs uppercase tracking-widest transition-opacity hover:opacity-70"
+              style={{ color: 'rgba(243,237,226,0.55)', fontFamily: 'var(--sds-font-mono)' }}
+            >
+              Warriors
+            </NextLink>
             {account && (
               <NextLink
                 href={`/warrior/${account.address}`}
