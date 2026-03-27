@@ -4,6 +4,7 @@
   "private": true,
   "packageManager": "pnpm@10.18.0",
   "scripts": {
+    "clean": "rm -rf .next .turbo",
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
