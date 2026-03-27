@@ -1,8 +1,9 @@
 import type { MedalKind, MedalSlug } from './config/medals'
+import type { ENetwork } from '~~/types/ENetwork'
 
 export interface ChronicleProfile {
   walletAddress: string
-  requestedNetwork: string
+  requestedNetwork: ENetwork
   observedNetwork: string | null
   evePackageId: string | null
   characterId: string | null

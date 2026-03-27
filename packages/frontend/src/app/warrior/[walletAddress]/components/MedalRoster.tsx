@@ -1,7 +1,14 @@
+'use client'
+
+import { useState } from 'react'
 import type { ChronicleMedalState } from '~~/chronicle/types'
+import type { ENetwork } from '~~/types/ENetwork'
+import MedalShareDialog from './MedalShareDialog'
 
 interface MedalRosterProps {
   medals: ChronicleMedalState[]
+  walletAddress: string
+  network: ENetwork
 }
 
 const TONE_COLORS: Record<string, { active: string; glow: string }> = {
@@ -53,72 +60,110 @@ const MedalIcon = ({ slug, active }: { slug: string; active: boolean }) => {
   )
 }
 
-export default function MedalRoster({ medals }: MedalRosterProps) {
-  return (
-    <div className="flex flex-col gap-3 w-full">
-      <p
-        className="text-xs uppercase tracking-widest"
-        style={{ color: 'rgba(255,255,255,0.4)', fontFamily: 'var(--sds-font-mono)' }}
-      >
-        Medal Record
-      </p>
-      <div className="flex items-center gap-4 flex-wrap">
-        {medals.map((medal) => {
-          const active = medal.claimed || medal.unlocked
-          const tone = MEDAL_TONE_MAP[medal.slug] || 'steel'
-          const { active: color } = TONE_COLORS[tone]
+export default function MedalRoster({
+  medals,
+  walletAddress,
+  network,
+}: MedalRosterProps) {
+  const [selectedMedal, setSelectedMedal] = useState<ChronicleMedalState | null>(
+    null
+  )
 
-          return (
-            <div
-              key={medal.slug}
-              className="flex flex-col items-center gap-1.5"
-              title={`${medal.title} — ${medal.claimed ? 'Bound' : medal.unlocked ? 'Verified' : 'Locked'}`}
-            >
-              <div
+  return (
+    <>
+      <div className="flex w-full flex-col gap-3">
+        <p
+          className="text-xs uppercase tracking-widest"
+          style={{ color: 'rgba(255,255,255,0.4)', fontFamily: 'var(--sds-font-mono)' }}
+        >
+          Medal Record
+        </p>
+        <div className="flex flex-wrap items-center gap-4">
+          {medals.map((medal) => {
+            const active = medal.claimed || medal.unlocked
+            const tone = MEDAL_TONE_MAP[medal.slug] || 'steel'
+            const { active: color } = TONE_COLORS[tone]
+
+            return (
+              <button
+                key={medal.slug}
+                type="button"
+                className="flex flex-col items-center gap-1.5 bg-transparent p-0 text-left"
+                title={`${medal.title} — ${medal.claimed ? 'Bound' : medal.unlocked ? 'Verified' : 'Locked'}`}
+                disabled={!medal.claimed}
+                onClick={() => medal.claimed && setSelectedMedal(medal)}
                 style={{
-                  padding: '10px',
-                  borderRadius: '8px',
-                  background: medal.claimed
-                    ? `rgba(${hexToRgb(color)}, 0.1)`
-                    : 'rgba(255,255,255,0.04)',
-                  border: `1px solid ${medal.claimed ? `rgba(${hexToRgb(color)}, 0.35)` : 'rgba(255,255,255,0.08)'}`,
-                  opacity: active ? 1 : 0.4,
-                  transition: 'all 0.3s',
+                  cursor: medal.claimed ? 'pointer' : 'default',
                 }}
               >
-                <MedalIcon slug={medal.slug} active={medal.claimed} />
-              </div>
-              <span
-                className="text-xs text-center max-w-[64px]"
-                style={{
-                  color: medal.claimed ? color : 'rgba(255,255,255,0.3)',
-                  fontFamily: 'var(--sds-font-mono)',
-                  fontSize: '9px',
-                  lineHeight: 1.3,
-                }}
-              >
-                {medal.subtitle}
-              </span>
-              <span
-                style={{
-                  fontSize: '8px',
-                  fontFamily: 'var(--sds-font-mono)',
-                  color: medal.claimed
-                    ? '#7ec38f'
-                    : medal.unlocked
-                      ? '#d9a441'
-                      : 'rgba(255,255,255,0.2)',
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.1em',
-                }}
-              >
-                {medal.claimed ? 'BOUND' : medal.unlocked ? 'VERIFIED' : 'LOCKED'}
-              </span>
-            </div>
-          )
-        })}
+                <div
+                  style={{
+                    padding: '10px',
+                    borderRadius: '8px',
+                    background: medal.claimed
+                      ? `rgba(${hexToRgb(color)}, 0.1)`
+                      : 'rgba(255,255,255,0.04)',
+                    border: `1px solid ${medal.claimed ? `rgba(${hexToRgb(color)}, 0.35)` : 'rgba(255,255,255,0.08)'}`,
+                    opacity: active ? 1 : 0.4,
+                    transition: 'all 0.3s',
+                    boxShadow: medal.claimed
+                      ? `0 0 0 1px rgba(${hexToRgb(color)}, 0.08), 0 10px 24px rgba(${hexToRgb(color)}, 0.16)`
+                      : 'none',
+                  }}
+                >
+                  <MedalIcon slug={medal.slug} active={medal.claimed} />
+                </div>
+                <span
+                  className="max-w-[64px] text-center text-xs"
+                  style={{
+                    color: medal.claimed ? color : 'rgba(255,255,255,0.3)',
+                    fontFamily: 'var(--sds-font-mono)',
+                    fontSize: '9px',
+                    lineHeight: 1.3,
+                  }}
+                >
+                  {medal.subtitle}
+                </span>
+                <span
+                  style={{
+                    fontSize: '8px',
+                    fontFamily: 'var(--sds-font-mono)',
+                    color: medal.claimed
+                      ? '#7ec38f'
+                      : medal.unlocked
+                        ? '#d9a441'
+                        : 'rgba(255,255,255,0.2)',
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.1em',
+                  }}
+                >
+                  {medal.claimed ? 'BOUND' : medal.unlocked ? 'VERIFIED' : 'LOCKED'}
+                </span>
+                <span
+                  style={{
+                    fontSize: '8px',
+                    fontFamily: 'var(--sds-font-mono)',
+                    color: medal.claimed ? 'rgba(240,100,47,0.72)' : 'transparent',
+                    letterSpacing: '0.16em',
+                    textTransform: 'uppercase',
+                  }}
+                >
+                  {medal.claimed ? 'Tap to share' : 'No share'}
+                </span>
+              </button>
+            )
+          })}
+        </div>
       </div>
-    </div>
+      {selectedMedal ? (
+        <MedalShareDialog
+          medal={selectedMedal}
+          walletAddress={walletAddress}
+          network={network}
+          onClose={() => setSelectedMedal(null)}
+        />
+      ) : null}
+    </>
   )
 }
 

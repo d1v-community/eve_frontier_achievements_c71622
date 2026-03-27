@@ -2,20 +2,22 @@ import { isValidSuiAddress } from '@mysten/sui/utils'
 import { notFound } from 'next/navigation'
 import type { Metadata } from 'next'
 import { getChronicleSnapshot } from '~~/server/chronicle/getSnapshot'
-import { ENetwork } from '~~/types/ENetwork'
+import { buildWarriorPageMetadata } from '~~/server/warrior/share'
+import {
+  resolveWarriorNetwork,
+  type WarriorRouteSearchParams,
+} from '~~/warrior/share'
 import WarriorCard from './components/WarriorCard'
 
 interface PageProps {
   params: Promise<{ walletAddress: string }>
-  searchParams: Promise<{ network?: string }>
+  searchParams: Promise<WarriorRouteSearchParams>
 }
 
-const resolveNetwork = (n: string | undefined): ENetwork => {
-  const valid = Object.values(ENetwork)
-  return valid.includes(n as ENetwork) ? (n as ENetwork) : ENetwork.TESTNET
-}
-
-export async function generateMetadata({ params, searchParams }: PageProps): Promise<Metadata> {
+export async function generateMetadata({
+  params,
+  searchParams,
+}: PageProps): Promise<Metadata> {
   const { walletAddress } = await params
   const { network: rawNetwork } = await searchParams
 
@@ -24,25 +26,9 @@ export async function generateMetadata({ params, searchParams }: PageProps): Pro
   }
 
   try {
-    const network = resolveNetwork(rawNetwork)
+    const network = resolveWarriorNetwork(rawNetwork)
     const snapshot = await getChronicleSnapshot(walletAddress, network)
-    const { rank, displayScore, claimedMedalCount } = snapshot.warriorScore
-    const short = `${walletAddress.slice(0, 8)}...${walletAddress.slice(-4)}`
-
-    return {
-      title: `${rank.title} — Frontier Chronicle`,
-      description: `Combat Score: ${displayScore.toLocaleString()} / 10,000 · ${claimedMedalCount} Medal${claimedMedalCount !== 1 ? 's' : ''} Bound · ${short}`,
-      openGraph: {
-        title: `${rank.title} (${rank.titleZh}) — Frontier Chronicle`,
-        description: `Combat Score: ${displayScore.toLocaleString()} / 10,000 · ${claimedMedalCount} Medal${claimedMedalCount !== 1 ? 's' : ''} Bound on Sui ${network}`,
-        siteName: 'Frontier Chronicle',
-      },
-      twitter: {
-        card: 'summary',
-        title: `${rank.title} — Frontier Chronicle`,
-        description: `Combat Score: ${displayScore.toLocaleString()} / 10,000 · ${claimedMedalCount} Medals Bound · Verified on Sui`,
-      },
-    }
+    return buildWarriorPageMetadata({ snapshot, walletAddress, network })
   } catch {
     return { title: 'Warrior Profile — Frontier Chronicle' }
   }
@@ -56,7 +42,7 @@ export default async function WarriorPage({ params, searchParams }: PageProps) {
     notFound()
   }
 
-  const network = resolveNetwork(rawNetwork)
+  const network = resolveWarriorNetwork(rawNetwork)
 
   let snapshot
   try {
@@ -67,15 +53,18 @@ export default async function WarriorPage({ params, searchParams }: PageProps) {
 
   return (
     <main
-      className="min-h-screen flex items-center justify-center px-4 py-16"
+      className="flex min-h-screen items-center justify-center px-4 py-16"
       style={{ background: 'var(--sds-dark)' }}
     >
       <div className="w-full max-w-2xl">
         {/* Back link */}
         <a
           href="/"
-          className="inline-flex items-center gap-2 mb-6 text-xs uppercase tracking-widest transition-opacity hover:opacity-60"
-          style={{ color: 'rgba(255,255,255,0.35)', fontFamily: 'var(--sds-font-mono)' }}
+          className="mb-6 inline-flex items-center gap-2 text-xs uppercase tracking-widest transition-opacity hover:opacity-60"
+          style={{
+            color: 'rgba(255,255,255,0.35)',
+            fontFamily: 'var(--sds-font-mono)',
+          }}
         >
           ← Frontier Chronicle
         </a>

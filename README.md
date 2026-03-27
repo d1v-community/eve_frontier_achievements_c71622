@@ -155,6 +155,7 @@ Recommended environment:
 ```bash
 NEXT_PUBLIC_TESTNET_CONTRACT_PACKAGE_ID=0x...
 EVE_EYES_API_KEY=...
+NEXT_PUBLIC_SITE_URL=https://frontier-chronicle.xyz
 # optional override
 EVE_EYES_BASE_URL=https://eve-eyes.d0v.xyz
 ```

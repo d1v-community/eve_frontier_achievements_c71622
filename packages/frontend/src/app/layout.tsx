@@ -6,9 +6,11 @@ import Footer from './components/layout/Footer'
 import { APP_DESCRIPTION, APP_NAME } from './config/main'
 import ClientProviders from './providers/ClientProviders'
 import { hasDatabaseUrl } from './server/db/client.mjs'
+import { getSiteUrl } from './server/site'
 import './styles/index.css'
 
 export const metadata: Metadata = {
+  metadataBase: getSiteUrl(),
   title: APP_NAME,
   description: APP_DESCRIPTION,
 }
