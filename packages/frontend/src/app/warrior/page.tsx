@@ -2,20 +2,24 @@
 
 import { useCurrentAccount } from '@mysten/dapp-kit'
 import { useRouter } from 'next/navigation'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import CustomConnectButton from '../components/CustomConnectButton'
 
 export default function WarriorIndexPage() {
   const account = useCurrentAccount()
   const router = useRouter()
+  const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
-    if (account?.address) {
-      router.replace(`/warrior/${account.address}`)
-    }
-  }, [account, router])
+    setMounted(true)
+  }, [])
 
-  if (account?.address) {
+  useEffect(() => {
+    if (!mounted || !account?.address) return
+    router.replace(`/warrior/${account.address}`)
+  }, [mounted, account, router])
+
+  if (!mounted || account?.address) {
     return null
   }
 
