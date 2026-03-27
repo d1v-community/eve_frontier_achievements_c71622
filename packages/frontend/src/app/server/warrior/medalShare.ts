@@ -45,6 +45,11 @@ export const MEDAL_TWITTER_IMAGE_SIZE = {
   height: 600,
 } as const
 
+export const MEDAL_DISCORD_IMAGE_SIZE = {
+  width: 1200,
+  height: 675,
+} as const
+
 const TONE_MAP: Record<MedalTone, MedalShareCardTone> = {
   crimson: {
     primary: '#e63946',

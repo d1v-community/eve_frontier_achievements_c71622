@@ -39,5 +39,10 @@ export const buildMedalImagePath = (
   walletAddress: string,
   slug: MedalSlug,
   network: ENetwork,
-  variant: 'opengraph' | 'twitter'
-) => `/warrior/${walletAddress}/medals/${slug}/${variant}-image?network=${network}`
+  variant: 'opengraph' | 'twitter' | 'discord'
+) => {
+  if (variant === 'discord') {
+    return `/warrior/${walletAddress}/medals/${slug}/discord-image?network=${network}`
+  }
+  return `/warrior/${walletAddress}/medals/${slug}/${variant}-image?network=${network}`
+}
