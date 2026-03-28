@@ -2,8 +2,11 @@ import { isValidSuiAddress } from '@mysten/sui/utils'
 import { notFound } from 'next/navigation'
 import type { Metadata } from 'next'
 import { getChronicleSnapshot } from '~~/server/chronicle/getSnapshot'
+import { getMockRouteSnapshot } from '~~/server/chronicle/mockRouteSnapshot'
 import { buildWarriorPageMetadata } from '~~/server/warrior/share'
 import {
+  isMockWarriorRoute,
+  resolveMockClaimedSlugs,
   resolveWarriorNetwork,
   type WarriorRouteSearchParams,
 } from '~~/warrior/share'
@@ -19,7 +22,8 @@ export async function generateMetadata({
   searchParams,
 }: PageProps): Promise<Metadata> {
   const { walletAddress } = await params
-  const { network: rawNetwork } = await searchParams
+  const { network: rawNetwork, m: rawMock, claimed: rawClaimed } =
+    await searchParams
 
   if (!isValidSuiAddress(walletAddress)) {
     return { title: 'Warrior Not Found — Frontier Chronicle' }
@@ -27,7 +31,13 @@ export async function generateMetadata({
 
   try {
     const network = resolveWarriorNetwork(rawNetwork)
-    const snapshot = await getChronicleSnapshot(walletAddress, network)
+    const snapshot = isMockWarriorRoute(rawMock)
+      ? getMockRouteSnapshot(
+          walletAddress,
+          network,
+          resolveMockClaimedSlugs(rawClaimed)
+        )
+      : await getChronicleSnapshot(walletAddress, network)
     return buildWarriorPageMetadata({ snapshot, walletAddress, network })
   } catch {
     return { title: 'Warrior Profile — Frontier Chronicle' }
@@ -36,7 +46,8 @@ export async function generateMetadata({
 
 export default async function WarriorPage({ params, searchParams }: PageProps) {
   const { walletAddress } = await params
-  const { network: rawNetwork } = await searchParams
+  const { network: rawNetwork, m: rawMock, claimed: rawClaimed } =
+    await searchParams
 
   if (!isValidSuiAddress(walletAddress)) {
     notFound()
@@ -46,7 +57,13 @@ export default async function WarriorPage({ params, searchParams }: PageProps) {
 
   let snapshot
   try {
-    snapshot = await getChronicleSnapshot(walletAddress, network)
+    snapshot = isMockWarriorRoute(rawMock)
+      ? getMockRouteSnapshot(
+          walletAddress,
+          network,
+          resolveMockClaimedSlugs(rawClaimed)
+        )
+      : await getChronicleSnapshot(walletAddress, network)
   } catch {
     notFound()
   }

@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 import type { ChronicleMedalState } from '~~/chronicle/types'
 import { notification } from '~~/helpers/notification'
 import type { ENetwork } from '~~/types/ENetwork'
-import { buildMedalImagePath, buildMedalSharePath } from '~~/warrior/share'
+import { buildMedalImagePath, buildMedalSharePath, generateMedalShareText } from '~~/warrior/share'
 import {
   copyShareValue,
   downloadShareAsset,
@@ -23,6 +23,7 @@ interface MedalShareDialogProps {
   medal: ChronicleMedalState
   walletAddress: string
   network: ENetwork
+  isMockMode?: boolean
   onClose: () => void
 }
 
@@ -30,6 +31,7 @@ export default function MedalShareDialog({
   medal,
   walletAddress,
   network,
+  isMockMode = false,
   onClose,
 }: MedalShareDialogProps) {
   const [previewVariant, setPreviewVariant] = useState<ImageVariant>('opengraph')
@@ -53,11 +55,26 @@ export default function MedalShareDialog({
   }, [onClose])
 
   const origin = typeof window === 'undefined' ? '' : window.location.origin
-  const sharePath = buildMedalSharePath(walletAddress, medal.slug, network)
+  const sharePath = buildMedalSharePath(walletAddress, medal.slug, network, {
+    mock: isMockMode,
+    claimed: isMockMode && medal.claimed ? [medal.slug] : [],
+  })
   const shareUrl = `${origin}${sharePath}`
-  const shareText = `${medal.subtitle} is chain-bound in Frontier Chronicle on Sui ${network.toUpperCase()}.`
+  const shareText = generateMedalShareText(medal.slug, medal.subtitle)
 
-  const imageUrl = `${origin}${buildMedalImagePath(walletAddress, medal.slug, network, previewVariant)}`
+  const imageUrl = `${origin}${buildMedalImagePath(
+    walletAddress,
+    medal.slug,
+    network,
+    previewVariant,
+    {
+      mock: isMockMode,
+      claimed: isMockMode && medal.claimed ? [medal.slug] : [],
+    }
+  )}`
+  const xShareUrl = `https://twitter.com/intent/tweet?url=${encodeURIComponent(shareUrl)}&text=${encodeURIComponent(shareText)}`
+  const telegramShareUrl = `https://t.me/share/url?url=${encodeURIComponent(shareUrl)}&text=${encodeURIComponent(shareText)}`
+  const discordShareUrl = 'https://discord.com/channels/@me'
 
   const trackShare = async (platform: string) => {
     try {
@@ -104,15 +121,13 @@ export default function MedalShareDialog({
   const handleShareToX = () => {
     setPreviewVariant('twitter')
     trackShare('x')
-    const target = `https://twitter.com/intent/tweet?url=${encodeURIComponent(shareUrl)}&text=${encodeURIComponent(shareText)}`
-    openShareWindow(target)
+    openShareWindow(xShareUrl)
   }
 
   const handleShareToTelegram = () => {
     setPreviewVariant('opengraph')
     trackShare('telegram')
-    const target = `https://t.me/share/url?url=${encodeURIComponent(shareUrl)}&text=${encodeURIComponent(shareText)}`
-    openShareWindow(target)
+    openShareWindow(telegramShareUrl)
   }
 
   const handleShareToDiscord = async () => {
@@ -124,7 +139,7 @@ export default function MedalShareDialog({
     }
 
     trackShare('discord')
-    openShareWindow('https://discord.com/channels/@me')
+    openShareWindow(discordShareUrl)
     notification.success('Medal link copied. Paste it into Discord.')
   }
 
@@ -255,6 +270,36 @@ export default function MedalShareDialog({
             >
               Discord uses a safe fallback: the dialog copies the medal link
               first, then opens Discord so you can paste it directly into chat.
+            </div>
+
+            <div
+              className="rounded-[1.2rem] border px-4 py-4"
+              style={{
+                borderColor: 'rgba(240,100,47,0.16)',
+                background:
+                  'linear-gradient(180deg, rgba(240,100,47,0.08), rgba(255,255,255,0.03))',
+              }}
+            >
+              <div className="font-mono text-[0.62rem] uppercase tracking-[0.3em] text-[#f0642f]">
+                share launch links
+              </div>
+              <div className="mt-4 grid gap-3">
+                {[
+                  ['X Intent', xShareUrl],
+                  ['Telegram Share', telegramShareUrl],
+                  ['Discord Paste Flow', discordShareUrl],
+                ].map(([label, href]) => (
+                  <a
+                    key={label}
+                    href={href}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="border border-white/10 bg-black/18 px-4 py-3 font-mono text-[0.6rem] uppercase tracking-[0.2em] text-[#f4efe2]/76 transition-transform hover:-translate-y-0.5 hover:border-[#f0642f]/28 hover:text-[#f4efe2]"
+                  >
+                    {label}
+                  </a>
+                ))}
+              </div>
             </div>
           </section>
 

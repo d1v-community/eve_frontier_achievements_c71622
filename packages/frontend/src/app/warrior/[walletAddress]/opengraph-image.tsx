@@ -1,6 +1,7 @@
 import { isValidSuiAddress } from '@mysten/sui/utils'
 import { ImageResponse } from 'next/og'
 import { getChronicleSnapshot } from '~~/server/chronicle/getSnapshot'
+import { getMockRouteSnapshot } from '~~/server/chronicle/mockRouteSnapshot'
 import {
   buildFallbackWarriorShareCardModel,
   buildWarriorShareCardModel,
@@ -8,6 +9,8 @@ import {
 } from '~~/server/warrior/share'
 import { WarriorShareImage } from '~~/server/warrior/shareCard'
 import {
+  isMockWarriorRoute,
+  resolveMockClaimedSlugs,
   resolveWarriorNetwork,
   type WarriorRouteSearchParams,
 } from '~~/warrior/share'
@@ -24,7 +27,8 @@ interface ImageProps {
 
 export default async function Image({ params, searchParams }: ImageProps) {
   const { walletAddress } = await params
-  const { network: rawNetwork } = await searchParams
+  const { network: rawNetwork, m: rawMock, claimed: rawClaimed } =
+    await searchParams
   const network = resolveWarriorNetwork(rawNetwork)
 
   if (!isValidSuiAddress(walletAddress)) {
@@ -41,7 +45,13 @@ export default async function Image({ params, searchParams }: ImageProps) {
   }
 
   try {
-    const snapshot = await getChronicleSnapshot(walletAddress, network)
+    const snapshot = isMockWarriorRoute(rawMock)
+      ? getMockRouteSnapshot(
+          walletAddress,
+          network,
+          resolveMockClaimedSlugs(rawClaimed)
+        )
+      : await getChronicleSnapshot(walletAddress, network)
     const model = await buildWarriorShareCardModel(snapshot, network)
 
     return new ImageResponse(

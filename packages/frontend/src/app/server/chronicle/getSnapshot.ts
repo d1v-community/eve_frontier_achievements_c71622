@@ -38,7 +38,12 @@ export const getChronicleSnapshot = async (
     activeTemplates = contractState.activeTemplates
   }
 
-  const baseMedals = buildMedalStates(activitySnapshot.counts, claimedSlugs, {})
+  const baseMedals = buildMedalStates(
+    activitySnapshot.counts,
+    claimedSlugs,
+    {},
+    activeTemplates
+  )
   let claimTicketsByKind: Partial<Record<number, ChronicleClaimTicket>> = {}
   const warnings = buildChronicleWarnings(
     activitySnapshot.scanLimitReached
@@ -72,7 +77,12 @@ export const getChronicleSnapshot = async (
     }
   }
 
-  const medals = buildMedalStates(activitySnapshot.counts, claimedSlugs, claimTicketsByKind)
+  const medals = buildMedalStates(
+    activitySnapshot.counts,
+    claimedSlugs,
+    claimTicketsByKind,
+    activeTemplates
+  )
 
   return {
     profile: {

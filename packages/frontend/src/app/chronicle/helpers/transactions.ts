@@ -28,3 +28,18 @@ export const prepareClaimMedalTransaction = (
 
   return tx
 }
+
+export const prepareMintMedalNftTransaction = (
+  packageId: string,
+  registryObjectId: string,
+  templateObjectId: string
+): Transaction => {
+  const tx = new Transaction()
+
+  tx.moveCall({
+    target: fullFunctionName(packageId, 'mint_medal_nft'),
+    arguments: [tx.object(registryObjectId), tx.object(templateObjectId)],
+  })
+
+  return tx
+}

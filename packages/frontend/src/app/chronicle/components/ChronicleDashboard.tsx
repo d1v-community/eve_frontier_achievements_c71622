@@ -11,11 +11,12 @@ import useTransact from '@suiware/kit/useTransact'
 import {
   BadgeCheckIcon,
   DatabaseIcon,
+  FlaskConicalIcon,
   RadarIcon,
   WaypointsIcon,
 } from 'lucide-react'
 import Image from 'next/image'
-import { type ReactNode, useEffect, useRef, useState } from 'react'
+import { type ReactNode, useEffect, useMemo, useRef, useState } from 'react'
 import CustomConnectButton from '~~/components/CustomConnectButton'
 import Loading from '~~/components/Loading'
 import OfficialActionButton from '~~/components/OfficialActionButton'
@@ -29,8 +30,14 @@ import { packageUrl, transactionUrl } from '~~/helpers/network'
 import useNetworkConfig from '~~/hooks/useNetworkConfig'
 import type { ChronicleMedalState } from '../types'
 import useChronicleSnapshot from '../hooks/useChronicleSnapshot'
-import { prepareClaimMedalTransaction } from '../helpers/transactions'
+import {
+  prepareClaimMedalTransaction,
+  prepareMintMedalNftTransaction,
+} from '../helpers/transactions'
+import { buildMockSnapshot } from '../mock/mockSnapshot'
+import type { ENetwork } from '~~/types/ENetwork'
 import MedalCard from './MedalCard'
+import MedalShareDialog from '~~/warrior/[walletAddress]/components/MedalShareDialog'
 
 type EvidenceTone = 'martian' | 'amber' | 'steel'
 type MedalGroup = {
@@ -39,6 +46,8 @@ type MedalGroup = {
   medals: ChronicleMedalState[]
   emptyText: string
 }
+
+const DEMO_SPOTLIGHT_SLUG = 'galactic-courier'
 
 const truncateMiddle = (value: string, prefix = 8, suffix = 6) =>
   `${value.slice(0, prefix)}...${value.slice(-suffix)}`
@@ -63,14 +72,29 @@ const sortMedals = (medals: ChronicleMedalState[]) =>
     return left.kind - right.kind
   })
 
-const ChronicleDashboard = () => {
+const getMedalActionLabel = (medal: ChronicleMedalState) => {
+  if (medal.claimTicket) {
+    return 'Claim Medal'
+  }
+
+  if (!medal.claimed && medal.unlocked && medal.templateObjectId) {
+    return 'Mint Medal'
+  }
+
+  return null
+}
+
+const ChronicleDashboard = ({ isMockMode = false }: { isMockMode?: boolean }) => {
   const currentAccount = useCurrentAccount()
   const { currentWallet } = useCurrentWallet()
   const { networkType } = useNetworkType()
-  const { data, error, isPending, refetch, network } = useChronicleSnapshot(
-    currentAccount?.address,
-    networkType
-  )
+  const {
+    data: rawData,
+    error: rawError,
+    isPending,
+    refetch,
+    network: rawNetwork,
+  } = useChronicleSnapshot(currentAccount?.address, networkType)
   const { useNetworkVariable } = useNetworkConfig()
   const packageId = useNetworkVariable(CONTRACT_PACKAGE_VARIABLE_NAME)
   const explorerUrl = useNetworkVariable(EXPLORER_URL_VARIABLE_NAME)
@@ -79,7 +103,25 @@ const ChronicleDashboard = () => {
     isValidSuiObjectId(packageId)
   const [notificationId, setNotificationId] = useState<string>()
   const [claimingSlug, setClaimingSlug] = useState<string | null>(null)
+  const [shareSlug, setShareSlug] = useState<string | null>(null)
+  const [localClaimedSlugs, setLocalClaimedSlugs] = useState<Set<string>>(
+    new Set()
+  )
   const announcedClaimablesRef = useRef<string>('')
+
+  // ── Mock mode overrides ───────────────────────────────────────────────────
+  const mockSnapshot = useMemo(() => {
+    if (!isMockMode || !currentAccount?.address) return null
+    return buildMockSnapshot(
+      currentAccount.address,
+      networkType as ENetwork,
+      localClaimedSlugs
+    )
+  }, [isMockMode, currentAccount?.address, networkType, localClaimedSlugs])
+
+  const data = isMockMode ? mockSnapshot : rawData
+  const error = isMockMode ? null : rawError
+  const network = isMockMode ? (networkType as ENetwork) : rawNetwork
 
   const { transact } = useTransact({
     onSuccess: (result: SuiSignAndExecuteTransactionOutput) => {
@@ -100,7 +142,7 @@ const ChronicleDashboard = () => {
   })
 
   useEffect(() => {
-    if (!data) {
+    if (isMockMode || !data) {
       announcedClaimablesRef.current = ''
       return
     }
@@ -117,9 +159,32 @@ const ChronicleDashboard = () => {
 
     notification.success('发现新的链上成就，可以立即 Claim。')
     announcedClaimablesRef.current = claimableKey
-  }, [data])
+  }, [data, isMockMode])
+
+  // Simulates the on-chain claim flow with a fake 1.5s "transaction" delay.
+  const runMockClaim = (slug: string) => {
+    const nextNotificationId = notification.txLoading()
+    setNotificationId(nextNotificationId)
+    setClaimingSlug(slug)
+
+    setTimeout(() => {
+      const fakeDigest =
+        'MOCK' + Math.random().toString(36).substring(2, 14).toUpperCase()
+      notification.txSuccess(`#${fakeDigest}`, nextNotificationId)
+      setClaimingSlug(null)
+      setLocalClaimedSlugs((prev) => new Set([...prev, slug]))
+      if (slug === DEMO_SPOTLIGHT_SLUG) {
+        notification.success('星门拓荒者已完成 mock mint，下一步直接点 Share。')
+      }
+    }, 1500)
+  }
 
   const handleClaim = (slug: string) => {
+    if (isMockMode) {
+      runMockClaim(slug)
+      return
+    }
+
     if (!data) {
       return
     }
@@ -160,6 +225,56 @@ const ChronicleDashboard = () => {
         packageId,
         data.profile.registryObjectId,
         medal.claimTicket
+      )
+    )
+  }
+
+  const handleMint = (slug: string) => {
+    if (isMockMode) {
+      runMockClaim(slug)
+      return
+    }
+
+    if (!data) {
+      return
+    }
+
+    const medal = data.medals.find((item) => item.slug === slug)
+
+    if (!medal) {
+      notification.error(null, 'Medal configuration is missing')
+      return
+    }
+
+    if (!isPackageConfigured) {
+      notification.error(
+        null,
+        'Current network has no medals package configured'
+      )
+      return
+    }
+
+    if (!data.profile.registryObjectId) {
+      notification.error(
+        null,
+        'Shared medal registry has not been discovered yet'
+      )
+      return
+    }
+
+    if (!medal.templateObjectId) {
+      notification.error(null, 'This medal has no active on-chain template')
+      return
+    }
+
+    const nextNotificationId = notification.txLoading()
+    setNotificationId(nextNotificationId)
+    setClaimingSlug(medal.slug)
+    transact(
+      prepareMintMedalNftTransaction(
+        packageId,
+        data.profile.registryObjectId,
+        medal.templateObjectId
       )
     )
   }
@@ -264,18 +379,66 @@ const ChronicleDashboard = () => {
 
   const infrastructureComplete =
     data.metrics.networkNodeAnchors >= 1 || data.metrics.storageUnitAnchors >= 3
+  const shareMedal =
+    shareSlug == null ? null : data.medals.find((medal) => medal.slug === shareSlug) ?? null
 
   return (
     <section className="mx-auto flex w-full max-w-7xl flex-col gap-6 px-4 py-2">
+      {isMockMode && (
+        <div className="overflow-hidden border border-[#d9a441]/42 bg-[linear-gradient(135deg,rgba(217,164,65,0.16),rgba(22,16,7,0.92),rgba(7,8,11,0.96))] shadow-[0_28px_90px_rgba(0,0,0,0.24)]">
+          <div className="grid gap-5 px-5 py-5 lg:grid-cols-[0.9fr_1.1fr] lg:px-6">
+            <div className="flex gap-3">
+              <FlaskConicalIcon className="mt-1 h-5 w-5 shrink-0 text-[#d9a441]" />
+              <div>
+                <div className="font-mono text-[0.62rem] uppercase tracking-[0.32em] text-[#f7d58a]">
+                  mock mode active
+                </div>
+                <div className="mt-3 font-display text-3xl uppercase tracking-[0.08em] text-[#f4efe2]">
+                  三步把演示打穿
+                </div>
+                <p className="mt-3 max-w-xl text-sm leading-7 text-[#f4efe2]/68">
+                  所有链上动作都被 mock 掉了，但视觉反馈、分享卡片和社交平台跳转都会真实发生，够你把整段产品叙事讲完。
+                </p>
+              </div>
+            </div>
+
+            <div className="grid gap-3 md:grid-cols-3">
+              {[
+                ['20s', '点击 Mint Medal', '先点“星门拓荒者”卡片，把勋章铸出来。'],
+                ['30s', '点击 Share Card', '弹出高冲击分享卡，切换 X / OG / Discord 尺寸。'],
+                ['40s', '点击平台按钮', '直接打开 X、Telegram、Discord 的分享链接。'],
+              ].map(([time, title, detail]) => (
+                <div
+                  key={title}
+                  className="border border-white/10 bg-black/18 px-4 py-4"
+                >
+                  <div className="font-mono text-[0.62rem] uppercase tracking-[0.28em] text-[#f7d58a]">
+                    {time}
+                  </div>
+                  <div className="mt-3 text-sm font-semibold uppercase tracking-[0.08em] text-[#f4efe2]">
+                    {title}
+                  </div>
+                  <div className="mt-2 text-sm leading-6 text-[#f4efe2]/62">
+                    {detail}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
       <div className="grid gap-6 xl:grid-cols-[1.18fr_0.82fr]">
         <div className="sds-panel rounded-[2rem] px-6 py-7 sm:px-8">
           <div className="flex flex-wrap items-center gap-3">
+            {isMockMode && (
+              <StatusPill tone="amber">Mock Mode</StatusPill>
+            )}
             <StatusPill tone={data.profile.scanMode === 'authenticated' ? 'success' : 'amber'}>
               {data.profile.scanMode === 'authenticated'
                 ? 'Deep Scan'
                 : 'Preview Scan'}
             </StatusPill>
-            <StatusPill tone="steel">{network.toUpperCase()}</StatusPill>
+            <StatusPill tone="steel">{(network ?? '…').toUpperCase()}</StatusPill>
             <StatusPill tone={claimableMedals.length > 0 ? 'martian' : 'steel'}>
               {claimableMedals.length > 0
                 ? `${claimableMedals.length} Ready Now`
@@ -470,14 +633,28 @@ const ChronicleDashboard = () => {
 
           {group.medals.length > 0 ? (
             <div className="grid gap-5 lg:grid-cols-2 xl:grid-cols-3">
-              {group.medals.map((medal) => (
-                <MedalCard
-                  key={medal.slug}
-                  medal={medal}
-                  isClaiming={claimingSlug === medal.slug}
-                  onClaim={() => handleClaim(medal.slug)}
-                />
-              ))}
+              {group.medals.map((medal) => {
+                const actionLabel = getMedalActionLabel(medal)
+
+                return (
+                  <MedalCard
+                    key={medal.slug}
+                    medal={medal}
+                    isClaiming={claimingSlug === medal.slug}
+                    actionLabel={actionLabel}
+                    onShare={
+                      medal.claimed
+                        ? () => setShareSlug(medal.slug)
+                        : null
+                    }
+                    onAction={() =>
+                      actionLabel === 'Claim Medal'
+                        ? handleClaim(medal.slug)
+                        : handleMint(medal.slug)
+                    }
+                  />
+                )
+              })}
             </div>
           ) : (
             <div className="border border-white/10 bg-black/14 px-5 py-5 text-sm leading-7 text-[#f4efe2]/66">
@@ -486,6 +663,16 @@ const ChronicleDashboard = () => {
           )}
         </section>
       ))}
+
+      {shareMedal && currentAccount ? (
+        <MedalShareDialog
+          medal={shareMedal}
+          walletAddress={currentAccount.address}
+          network={network ?? ENetwork.TESTNET}
+          isMockMode={isMockMode}
+          onClose={() => setShareSlug(null)}
+        />
+      ) : null}
     </section>
   )
 }

@@ -127,3 +127,151 @@ fun test_deactivate_template() {
 
     ts.end();
 }
+
+#[test]
+fun test_admin_mint_all_eight_medals() {
+    let owner = @0xA;
+    let mut ts = ts::begin(owner);
+
+    {
+        medals::init_for_testing(ts.ctx());
+    };
+
+    ts.next_tx(owner);
+    let admin_cap = ts.take_from_sender<medals::AdminCap>();
+
+    let medal_kinds = vector[
+        medals::bloodlust_butcher(),
+        medals::void_pioneer(),
+        medals::galactic_courier(),
+        medals::turret_sentry(),
+        medals::assembly_pioneer(),
+        medals::turret_anchor(),
+        medals::ssu_trader(),
+        medals::fuel_feeder(),
+    ];
+
+    let expected_names = vector[
+        b"Bloodlust Butcher".to_string(),
+        b"Void Pioneer".to_string(),
+        b"Galactic Courier".to_string(),
+        b"Turret Sentry".to_string(),
+        b"Assembly Pioneer".to_string(),
+        b"Turret Anchor".to_string(),
+        b"SSU Trader".to_string(),
+        b"Fuel Feeder".to_string(),
+    ];
+
+    let expected_rarities = vector[
+        b"Legendary".to_string(),
+        b"Epic".to_string(),
+        b"Rare".to_string(),
+        b"Uncommon".to_string(),
+        b"Uncommon".to_string(),
+        b"Rare".to_string(),
+        b"Uncommon".to_string(),
+        b"Uncommon".to_string(),
+    ];
+
+    let mut i = 0;
+    while (i < medal_kinds.length()) {
+        let registry: medals::MedalRegistry = ts.take_shared();
+        let template_id = medals::active_template_id(&registry, medal_kinds[i]);
+        let template: medals::MedalTemplate = ts.take_shared_by_id(template_id);
+
+        medals::admin_mint(&admin_cap, &template, owner, ts.ctx());
+
+        ts::return_shared(registry);
+        ts::return_shared(template);
+        ts.next_tx(owner);
+
+        let medal = ts.take_from_sender<medals::Medal>();
+        assert!(medals::medal_kind(&medal) == medal_kinds[i], i);
+        assert!(medals::name(&medal) == expected_names[i], i + 100);
+        assert!(medals::rarity(&medal) == expected_rarities[i], i + 200);
+        assert!(medals::evidence_uri(&medal) == b"admin-mint".to_string(), i + 300);
+
+        medals::destroy_for_testing(medal);
+        i = i + 1;
+    };
+
+    medals::destroy_admin_cap_for_testing(admin_cap);
+    ts.end();
+}
+
+#[test]
+fun test_public_mint_all_eight_medals() {
+    let owner = @0xA;
+    let mut ts = ts::begin(owner);
+
+    {
+        medals::init_for_testing(ts.ctx());
+    };
+
+    ts.next_tx(owner);
+    let medal_kinds = vector[
+        medals::bloodlust_butcher(),
+        medals::void_pioneer(),
+        medals::galactic_courier(),
+        medals::turret_sentry(),
+        medals::assembly_pioneer(),
+        medals::turret_anchor(),
+        medals::ssu_trader(),
+        medals::fuel_feeder(),
+    ];
+
+    let expected_names = vector[
+        b"Bloodlust Butcher".to_string(),
+        b"Void Pioneer".to_string(),
+        b"Galactic Courier".to_string(),
+        b"Turret Sentry".to_string(),
+        b"Assembly Pioneer".to_string(),
+        b"Turret Anchor".to_string(),
+        b"SSU Trader".to_string(),
+        b"Fuel Feeder".to_string(),
+    ];
+
+    let mut i = 0;
+    while (i < medal_kinds.length()) {
+        let mut registry: medals::MedalRegistry = ts.take_shared();
+        let template_id = medals::active_template_id(&registry, medal_kinds[i]);
+        let template: medals::MedalTemplate = ts.take_shared_by_id(template_id);
+
+        medals::mint_medal_nft(&mut registry, &template, ts.ctx());
+
+        ts::return_shared(registry);
+        ts::return_shared(template);
+        ts.next_tx(owner);
+
+        let medal = ts.take_from_sender<medals::Medal>();
+        assert!(medals::medal_kind(&medal) == medal_kinds[i], i);
+        assert!(medals::name(&medal) == expected_names[i], i + 100);
+        assert!(medals::evidence_uri(&medal) == b"public-mint".to_string(), i + 200);
+
+        medals::destroy_for_testing(medal);
+        i = i + 1;
+    };
+
+    ts.end();
+}
+
+#[test, expected_failure(abort_code = 1)]
+fun test_cannot_public_mint_same_medal_twice() {
+    let owner = @0xA;
+    let mut ts = ts::begin(owner);
+
+    {
+        medals::init_for_testing(ts.ctx());
+    };
+
+    ts.next_tx(owner);
+    let mut registry: medals::MedalRegistry = ts.take_shared();
+    let template_id = medals::active_template_id(&registry, medals::bloodlust_butcher());
+    let template: medals::MedalTemplate = ts.take_shared_by_id(template_id);
+    medals::mint_medal_nft(&mut registry, &template, ts.ctx());
+    medals::mint_medal_nft(&mut registry, &template, ts.ctx());
+
+    ts::return_shared(registry);
+    ts::return_shared(template);
+    ts.end();
+}

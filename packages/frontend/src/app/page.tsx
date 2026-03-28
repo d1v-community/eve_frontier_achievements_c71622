@@ -360,7 +360,13 @@ function TrustCard({
   )
 }
 
-export default function Home() {
+export default async function Home({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>
+}) {
+  const params = await searchParams
+  const isMockMode = params['m'] === '1'
   return (
     <div className="relative pb-14">
       <section className="px-4 pt-5 sm:px-6 lg:px-8">
@@ -493,7 +499,7 @@ export default function Home() {
               </div>
 
               <div className="border border-white/10 bg-black/14 p-2">
-                <ChronicleDashboard />
+                <ChronicleDashboard isMockMode={isMockMode} />
               </div>
             </div>
           </div>

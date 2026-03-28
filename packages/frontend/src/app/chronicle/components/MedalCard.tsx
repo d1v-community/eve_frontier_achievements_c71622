@@ -46,11 +46,15 @@ const TONE_STYLES = {
 const MedalCard = ({
   medal,
   isClaiming,
-  onClaim,
+  onAction,
+  actionLabel,
+  onShare,
 }: {
   medal: ChronicleMedalState
   isClaiming: boolean
-  onClaim: () => void
+  onAction: () => void
+  actionLabel: string | null
+  onShare?: (() => void) | null
 }) => {
   const definition = getMedalDefinitionByKind(medal.kind)
   const tone = definition ? TONE_STYLES[definition.tone] : TONE_STYLES.azure
@@ -65,7 +69,9 @@ const MedalCard = ({
 
   const statusDetail = medal.claimed
     ? '该奖章已经绑定到当前钱包。'
-    : medal.claimable
+    : actionLabel === 'Mint Medal'
+      ? '条件满足，当前可以直接走公开 mint，把这枚奖章铸到钱包里。'
+      : medal.claimable
       ? '条件满足，可以立即发起链上 Claim。'
       : medal.unlocked
         ? '门槛已经到位，但当前链上领取通道还没就绪。'
@@ -129,19 +135,32 @@ const MedalCard = ({
       </div>
 
       <div className="mt-5 flex items-start justify-between gap-4">
-        <div className="text-white/68 min-h-10 text-sm leading-7">
+        <div className="text-white/68 min-h-10 flex-1 text-sm leading-7">
           {statusDetail}
         </div>
 
-        {medal.claimable ? (
-          <EveButton
-            typeClass="primary"
-            className="!min-w-[10.75rem] !self-auto"
-            disabled={isClaiming}
-            onClick={() => onClaim()}
-          >
-            {isClaiming ? 'Claiming...' : 'Claim Medal'}
-          </EveButton>
+        {actionLabel || onShare ? (
+          <div className="flex shrink-0 flex-col gap-2">
+            {actionLabel ? (
+              <EveButton
+                typeClass="primary"
+                className="!min-w-[10.75rem] !self-auto"
+                disabled={isClaiming}
+                onClick={() => onAction()}
+              >
+                {isClaiming ? 'Submitting...' : actionLabel}
+              </EveButton>
+            ) : null}
+            {onShare ? (
+              <button
+                type="button"
+                onClick={() => onShare()}
+                className="border border-white/12 bg-white/6 px-4 py-3 text-left font-mono text-[0.68rem] uppercase tracking-[0.22em] text-white/78 transition-transform hover:-translate-y-0.5 hover:bg-white/10"
+              >
+                Share Card
+              </button>
+            ) : null}
+          </div>
         ) : (
           <div className="bg-black/14 border border-white/10 px-4 py-2 font-mono text-[0.62rem] uppercase tracking-[0.22em] text-white/65">
             {medal.claimed

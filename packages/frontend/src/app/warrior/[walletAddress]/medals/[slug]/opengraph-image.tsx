@@ -2,6 +2,7 @@ import { isValidSuiAddress } from '@mysten/sui/utils'
 import { ImageResponse } from 'next/og'
 import { getMedalDefinitionBySlug } from '~~/chronicle/config/medals'
 import { getChronicleSnapshot } from '~~/server/chronicle/getSnapshot'
+import { getMockRouteSnapshot } from '~~/server/chronicle/mockRouteSnapshot'
 import {
   buildFallbackMedalShareCardModel,
   buildMedalShareCardModel,
@@ -10,6 +11,8 @@ import {
 import { MedalShareImage } from '~~/server/warrior/medalShareCard'
 import {
   type WarriorRouteSearchParams,
+  isMockWarriorRoute,
+  resolveMockClaimedSlugs,
   resolveWarriorNetwork,
 } from '~~/warrior/share'
 
@@ -25,7 +28,8 @@ interface ImageProps {
 
 export default async function Image({ params, searchParams }: ImageProps) {
   const { walletAddress, slug } = await params
-  const { network: rawNetwork } = await searchParams
+  const { network: rawNetwork, m: rawMock, claimed: rawClaimed } =
+    await searchParams
   const network = resolveWarriorNetwork(rawNetwork)
   const definition = getMedalDefinitionBySlug(slug)
 
@@ -43,7 +47,13 @@ export default async function Image({ params, searchParams }: ImageProps) {
   }
 
   try {
-    const snapshot = await getChronicleSnapshot(walletAddress, network)
+    const snapshot = isMockWarriorRoute(rawMock)
+      ? getMockRouteSnapshot(
+          walletAddress,
+          network,
+          resolveMockClaimedSlugs(rawClaimed)
+        )
+      : await getChronicleSnapshot(walletAddress, network)
     const model = await buildMedalShareCardModel({
       snapshot,
       walletAddress,

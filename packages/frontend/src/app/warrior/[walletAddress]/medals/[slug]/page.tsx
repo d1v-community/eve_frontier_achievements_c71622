@@ -3,11 +3,17 @@ import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import { getMedalDefinitionBySlug } from '~~/chronicle/config/medals'
 import { getChronicleSnapshot } from '~~/server/chronicle/getSnapshot'
+import { getMockRouteSnapshot } from '~~/server/chronicle/mockRouteSnapshot'
 import {
   buildMedalPageMetadata,
   getSnapshotMedal,
 } from '~~/server/warrior/medalShare'
-import { type WarriorRouteSearchParams, resolveWarriorNetwork } from '~~/warrior/share'
+import {
+  type WarriorRouteSearchParams,
+  isMockWarriorRoute,
+  resolveMockClaimedSlugs,
+  resolveWarriorNetwork,
+} from '~~/warrior/share'
 import MedalPageClient from './MedalPageClient'
 
 interface PageProps {
@@ -20,7 +26,8 @@ export async function generateMetadata({
   searchParams,
 }: PageProps): Promise<Metadata> {
   const { walletAddress, slug } = await params
-  const { network: rawNetwork } = await searchParams
+  const { network: rawNetwork, m: rawMock, claimed: rawClaimed } =
+    await searchParams
 
   if (!isValidSuiAddress(walletAddress)) {
     return { title: 'Medal Not Found — Frontier Chronicle' }
@@ -34,7 +41,13 @@ export async function generateMetadata({
 
   try {
     const network = resolveWarriorNetwork(rawNetwork)
-    const snapshot = await getChronicleSnapshot(walletAddress, network)
+    const snapshot = isMockWarriorRoute(rawMock)
+      ? getMockRouteSnapshot(
+          walletAddress,
+          network,
+          resolveMockClaimedSlugs(rawClaimed)
+        )
+      : await getChronicleSnapshot(walletAddress, network)
     return buildMedalPageMetadata({
       snapshot,
       walletAddress,
@@ -48,7 +61,8 @@ export async function generateMetadata({
 
 export default async function MedalSharePage({ params, searchParams }: PageProps) {
   const { walletAddress, slug } = await params
-  const { network: rawNetwork } = await searchParams
+  const { network: rawNetwork, m: rawMock, claimed: rawClaimed } =
+    await searchParams
 
   if (!isValidSuiAddress(walletAddress)) {
     notFound()
@@ -64,7 +78,13 @@ export default async function MedalSharePage({ params, searchParams }: PageProps
 
   let snapshot
   try {
-    snapshot = await getChronicleSnapshot(walletAddress, network)
+    snapshot = isMockWarriorRoute(rawMock)
+      ? getMockRouteSnapshot(
+          walletAddress,
+          network,
+          resolveMockClaimedSlugs(rawClaimed)
+        )
+      : await getChronicleSnapshot(walletAddress, network)
   } catch {
     notFound()
   }

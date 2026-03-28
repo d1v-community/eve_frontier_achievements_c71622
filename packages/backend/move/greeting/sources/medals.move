@@ -349,6 +349,85 @@ public fun claim_medal(
     );
 }
 
+public fun admin_mint(
+    _admin_cap: &AdminCap,
+    template: &MedalTemplate,
+    recipient: address,
+    ctx: &mut tx_context::TxContext,
+) {
+    assert!(template.active, ETemplateInactive);
+
+    let now_ms = tx_context::epoch_timestamp_ms(ctx);
+    let medal = Medal {
+        id: object::new(ctx),
+        medal_kind: template.medal_kind,
+        template_version: template.template_version,
+        template_id: template.id.to_inner(),
+        slug: template.slug,
+        name: template.name,
+        description: template.description,
+        rarity: template.rarity,
+        image_url: template.image_url,
+        proof_digest: vector[],
+        evidence_uri: utf8(b"admin-mint"),
+        awarded_at_ms: now_ms,
+    };
+
+    emit(EventMedalClaimed {
+        medal_id: medal.id.to_inner(),
+        owner: recipient,
+        template_id: template.id.to_inner(),
+        medal_kind: template.medal_kind,
+        template_version: template.template_version,
+        proof_digest: vector[],
+    });
+
+    transfer::transfer(medal, recipient);
+}
+
+public fun mint_medal_nft(
+    registry: &mut MedalRegistry,
+    template: &MedalTemplate,
+    ctx: &mut tx_context::TxContext,
+) {
+    assert!(template.active, ETemplateInactive);
+    let owner = tx_context::sender(ctx);
+    let claim_key = ClaimKey {
+        owner,
+        medal_kind: template.medal_kind,
+    };
+    assert!(!field::exists_(&registry.id, claim_key), EMedalAlreadyClaimed);
+    field::add(&mut registry.id, claim_key, true);
+
+    let now_ms = tx_context::epoch_timestamp_ms(ctx);
+    let medal = Medal {
+        id: object::new(ctx),
+        medal_kind: template.medal_kind,
+        template_version: template.template_version,
+        template_id: template.id.to_inner(),
+        slug: template.slug,
+        name: template.name,
+        description: template.description,
+        rarity: template.rarity,
+        image_url: template.image_url,
+        proof_digest: vector[],
+        evidence_uri: utf8(b"public-mint"),
+        awarded_at_ms: now_ms,
+    };
+    let medal_id = medal.id.to_inner();
+
+    emit(EventMedalClaimed {
+        medal_id,
+        owner,
+        template_id: template.id.to_inner(),
+        medal_kind: template.medal_kind,
+        template_version: template.template_version,
+        proof_digest: vector[],
+    });
+
+    transfer::transfer(medal, owner);
+}
+
 fun mint_medal(
     registry: &mut MedalRegistry,
     template: &MedalTemplate,

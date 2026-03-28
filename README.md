@@ -159,6 +159,7 @@ This repository now ships a hackathon-ready `Frontier Chronicle` flow for EVE Fr
 
 - Eve Eyes-backed activity scan via `app/api/chronicle`
 - Non-transferable `medals::medals` SBT contract
+- Public `mint_medal_nft` entrypoint for direct minting of the eight medal NFTs
 - Wallet dashboard for scan -> claim -> showcase
 
 Recommended environment:
