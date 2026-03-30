@@ -311,7 +311,10 @@ export async function HomePage({
 }: {
   isMockMode?: boolean
 }) {
-  const t = await getTranslations('home')
+  const [t, mockT] = await Promise.all([
+    getTranslations('home'),
+    getTranslations('mockFlow'),
+  ])
 
   const stepCards = [
     {
@@ -444,6 +447,29 @@ export async function HomePage({
       body: t('demo.steps.threeBody'),
     },
   ]
+
+  const chainLoopSteps = [
+    {
+      key: 'prepare',
+      title: mockT('stages.mint.prepare.label'),
+      body: mockT('home.steps.prepare'),
+    },
+    {
+      key: 'sign',
+      title: mockT('stages.mint.sign.label'),
+      body: mockT('home.steps.sign'),
+    },
+    {
+      key: 'submit',
+      title: mockT('stages.mint.submit.label'),
+      body: mockT('home.steps.submit'),
+    },
+    {
+      key: 'finalize',
+      title: mockT('stages.mint.finalize.label'),
+      body: mockT('home.steps.finalize'),
+    },
+  ] as const
 
   return (
     <div className="relative pb-14">
@@ -586,6 +612,43 @@ export async function HomePage({
 
           <EnvironmentRequirements />
           <NetworkSupportChecker />
+        </div>
+      </section>
+
+      <section className="scroll-mt-28 px-4 py-8 sm:px-6 lg:px-8">
+        <div className="mx-auto max-w-7xl">
+          <div className="sds-panel rounded-[2rem] px-5 py-6 sm:px-8 sm:py-8">
+            <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
+              <div className="max-w-3xl">
+                <SectionEyebrow>{mockT('home.eyebrow')}</SectionEyebrow>
+                <h2 className="mt-4 font-display text-4xl uppercase tracking-[0.08em] text-[#f4efe2] sm:text-5xl">
+                  {mockT('home.title')}
+                </h2>
+              </div>
+              <p className="max-w-xl text-sm leading-7 text-[#f4efe2]/66">
+                {mockT('home.body')}
+              </p>
+            </div>
+
+            <div className="mt-8 grid gap-4 xl:grid-cols-4">
+              {chainLoopSteps.map((step, index) => (
+                <div
+                  key={step.key}
+                  style={{animationDelay: `${index * 100}ms`} as CSSProperties}
+                >
+                  <DemoStepCard
+                    step={{
+                      label: `${String(index + 1).padStart(2, '0')} · ${mockT(
+                        'actions.mint'
+                      )}`,
+                      title: step.title,
+                      body: step.body,
+                    }}
+                  />
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
       </section>
 

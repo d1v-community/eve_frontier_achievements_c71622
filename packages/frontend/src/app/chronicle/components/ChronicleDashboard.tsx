@@ -36,8 +36,15 @@ import {
   prepareMintMedalNftTransaction,
 } from '../helpers/transactions'
 import { buildMockSnapshot } from '../mock/mockSnapshot'
+import {
+  createMockMedalReceipt,
+  type MockMedalTxAction,
+  type MockMedalTxReceipt,
+  runMockMedalTransaction,
+} from '../mock/mockTransaction'
 import { ENetwork } from '~~/types/ENetwork'
 import MedalCard from './MedalCard'
+import MockWalletConfirmDialog from './MockWalletConfirmDialog'
 import MedalShareDialog from '~~/warrior/[walletAddress]/components/MedalShareDialog'
 
 type EvidenceTone = 'martian' | 'amber' | 'steel'
@@ -47,6 +54,11 @@ type MedalGroup = {
   medals: ChronicleMedalState[]
   emptyText: string
 }
+type PendingMockAction = {
+  action: MockMedalTxAction
+  medal: ChronicleMedalState
+  receipt: MockMedalTxReceipt
+} | null
 
 const DEMO_SPOTLIGHT_SLUG = 'galactic-courier'
 
@@ -92,6 +104,18 @@ const getMedalActionLabel = (
   return null
 }
 
+const getMedalActionKind = (medal: ChronicleMedalState): MockMedalTxAction | null => {
+  if (medal.claimTicket) {
+    return 'claim'
+  }
+
+  if (!medal.claimed && medal.unlocked && medal.templateObjectId) {
+    return 'mint'
+  }
+
+  return null
+}
+
 const ChronicleDashboard = ({ isMockMode = false }: { isMockMode?: boolean }) => {
   const locale = useLocale()
   const t = useTranslations('chronicleDashboard')
@@ -114,6 +138,13 @@ const ChronicleDashboard = ({ isMockMode = false }: { isMockMode?: boolean }) =>
   const [notificationId, setNotificationId] = useState<string>()
   const [claimingSlug, setClaimingSlug] = useState<string | null>(null)
   const [shareSlug, setShareSlug] = useState<string | null>(null)
+  const [mockTransactions, setMockTransactions] = useState<
+    Record<string, MockMedalTxReceipt>
+  >({})
+  const [mockReceipts, setMockReceipts] = useState<Record<string, MockMedalTxReceipt>>(
+    {}
+  )
+  const [pendingMockAction, setPendingMockAction] = useState<PendingMockAction>(null)
   const [localClaimedSlugs, setLocalClaimedSlugs] = useState<Set<string>>(
     new Set()
   )
@@ -171,30 +202,66 @@ const ChronicleDashboard = ({ isMockMode = false }: { isMockMode?: boolean }) =>
     announcedClaimablesRef.current = claimableKey
   }, [data, isMockMode, t])
 
-  // Simulates the on-chain claim flow with a fake 1.5s "transaction" delay.
-  const runMockClaim = (slug: string) => {
+  const runMockMedalFlow = async (
+    medal: ChronicleMedalState,
+    action: MockMedalTxAction,
+    initialReceipt: MockMedalTxReceipt
+  ) => {
     const nextNotificationId = notification.txLoading()
     setNotificationId(nextNotificationId)
-    setClaimingSlug(slug)
+    setClaimingSlug(medal.slug)
+    setMockReceipts((prev) => {
+      if (!prev[medal.slug]) {
+        return prev
+      }
 
-    setTimeout(() => {
-      const fakeDigest =
-        'MOCK' + Math.random().toString(36).substring(2, 14).toUpperCase()
-      notification.txSuccess(`#${fakeDigest}`, nextNotificationId)
+      const next = { ...prev }
+      delete next[medal.slug]
+      return next
+    })
+
+    try {
+      const receipt = await runMockMedalTransaction({
+        slug: medal.slug,
+        action,
+        medalTitle: medal.title,
+        receipt: initialReceipt,
+        onUpdate: (nextReceipt) => {
+          setMockTransactions((prev) => ({
+            ...prev,
+            [medal.slug]: nextReceipt,
+          }))
+        },
+      })
+
+      notification.txSuccess(`#${receipt.digest}`, nextNotificationId)
+      setMockTransactions((prev) => {
+        const next = { ...prev }
+        delete next[medal.slug]
+        return next
+      })
+      setMockReceipts((prev) => ({
+        ...prev,
+        [medal.slug]: receipt,
+      }))
       setClaimingSlug(null)
-      setLocalClaimedSlugs((prev) => new Set([...prev, slug]))
-      if (slug === DEMO_SPOTLIGHT_SLUG) {
+      setLocalClaimedSlugs((prev) => new Set([...prev, medal.slug]))
+
+      if (medal.slug === DEMO_SPOTLIGHT_SLUG) {
         notification.success(t('toast.mockMintReady'))
       }
-    }, 1500)
+    } catch (error) {
+      setMockTransactions((prev) => {
+        const next = { ...prev }
+        delete next[medal.slug]
+        return next
+      })
+      setClaimingSlug(null)
+      notification.txError(error as Error, null, nextNotificationId)
+    }
   }
 
   const handleClaim = (slug: string) => {
-    if (isMockMode) {
-      runMockClaim(slug)
-      return
-    }
-
     if (!data) {
       return
     }
@@ -203,6 +270,20 @@ const ChronicleDashboard = ({ isMockMode = false }: { isMockMode?: boolean }) =>
 
     if (!medal) {
       notification.error(null, t('errors.missingMedalConfig'))
+      return
+    }
+
+    if (isMockMode) {
+      setPendingMockAction({
+        medal,
+        action: 'claim',
+        receipt: createMockMedalReceipt({
+          slug: medal.slug,
+          action: 'claim',
+          medalTitle: medal.title,
+          walletAddress: currentAccount?.address,
+        }),
+      })
       return
     }
 
@@ -240,11 +321,6 @@ const ChronicleDashboard = ({ isMockMode = false }: { isMockMode?: boolean }) =>
   }
 
   const handleMint = (slug: string) => {
-    if (isMockMode) {
-      runMockClaim(slug)
-      return
-    }
-
     if (!data) {
       return
     }
@@ -253,6 +329,20 @@ const ChronicleDashboard = ({ isMockMode = false }: { isMockMode?: boolean }) =>
 
     if (!medal) {
       notification.error(null, t('errors.missingMedalConfig'))
+      return
+    }
+
+    if (isMockMode) {
+      setPendingMockAction({
+        medal,
+        action: 'mint',
+        receipt: createMockMedalReceipt({
+          slug: medal.slug,
+          action: 'mint',
+          medalTitle: medal.title,
+          walletAddress: currentAccount?.address,
+        }),
+      })
       return
     }
 
@@ -367,7 +457,7 @@ const ChronicleDashboard = ({ isMockMode = false }: { isMockMode?: boolean }) =>
 
   const medalGroups: MedalGroup[] = [
     {
-      title: 'Ready To Claim',
+      title: t('groups.ready.title'),
       description: t('groups.ready.description'),
       medals: claimableMedals,
       emptyText: t('groups.ready.empty'),
@@ -658,6 +748,7 @@ const ChronicleDashboard = ({ isMockMode = false }: { isMockMode?: boolean }) =>
             <div className="grid gap-5 lg:grid-cols-2 xl:grid-cols-3">
               {group.medals.map((medal) => {
                 const actionLabel = getMedalActionLabel(medal, t)
+                const actionKind = getMedalActionKind(medal)
 
                 return (
                   <MedalCard
@@ -665,6 +756,9 @@ const ChronicleDashboard = ({ isMockMode = false }: { isMockMode?: boolean }) =>
                     medal={medal}
                     isClaiming={claimingSlug === medal.slug}
                     actionLabel={actionLabel}
+                    actionKind={actionKind}
+                    mockTransaction={mockTransactions[medal.slug] ?? null}
+                    mockReceipt={mockReceipts[medal.slug] ?? null}
                     onShare={
                       medal.claimed
                         ? () => setShareSlug(medal.slug)
@@ -693,9 +787,29 @@ const ChronicleDashboard = ({ isMockMode = false }: { isMockMode?: boolean }) =>
           walletAddress={currentAccount.address}
           network={network ?? ENetwork.TESTNET}
           isMockMode={isMockMode}
+          mockReceipt={shareSlug ? mockReceipts[shareSlug] ?? null : null}
           onClose={() => setShareSlug(null)}
         />
       ) : null}
+
+      <MockWalletConfirmDialog
+        open={pendingMockAction != null}
+        action={pendingMockAction?.action ?? null}
+        medalTitle={pendingMockAction?.medal.title ?? null}
+        walletAddress={currentAccount?.address ?? null}
+        network={(network ?? ENetwork.TESTNET).toUpperCase()}
+        receipt={pendingMockAction?.receipt ?? null}
+        onClose={() => setPendingMockAction(null)}
+        onConfirm={() => {
+          if (!pendingMockAction) {
+            return
+          }
+
+          const { medal, action, receipt } = pendingMockAction
+          setPendingMockAction(null)
+          void runMockMedalFlow(medal, action, receipt)
+        }}
+      />
     </section>
   )
 }

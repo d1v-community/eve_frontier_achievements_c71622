@@ -285,6 +285,198 @@
       "noShare": "不可分享"
     }
   },
+  "mockFlow": {
+    "actions": {
+      "mint": "铸造勋章",
+      "claim": "领取勋章"
+    },
+    "statuses": {
+      "running": "执行中",
+      "done": "已完成",
+      "queued": "排队中"
+    },
+    "panel": {
+      "pipeline": "mock 链上流程",
+      "receipt": "mock 链上回执",
+      "step": "步骤 {current} / {total}",
+      "explorerTitle": "mock explorer 回执",
+      "explorerBody": "虽然链上交互还是 mock，但这里会把真实浏览器里该有的交易检查点、对象变化和 gas 面板都摆出来。",
+      "pending": "等待最终确认",
+      "finalized": "checkpoint 已确认"
+    },
+    "sections": {
+      "events": "事件",
+      "objectChanges": "对象变化"
+    },
+    "fields": {
+      "digest": "交易摘要",
+      "checkpoint": "检查点",
+      "package": "合约包",
+      "object": "对象",
+      "gasBudget": "gas 预算",
+      "gasUsed": "gas 消耗",
+      "storageRebate": "storage 返还",
+      "updatedAt": "更新时间"
+    },
+    "wallet": {
+      "eyebrow": "mock 钱包确认",
+      "title": "确认{action}",
+      "body": "请先为 {medalTitle} 确认这笔 mock 钱包请求。确认后，界面会按阶段执行 {action} 流程，最后落到 explorer 风格的交易回执。",
+      "close": "关闭",
+      "cancel": "取消",
+      "confirm": "确认{action}",
+      "estimateTitle": "预估交易足迹",
+      "note": "这里仍然是 mock 钱包界面，不会真的触链，但它会完整模拟真实钱包在 sign-and-submit 之前该有的确认节奏。",
+      "actions": {
+        "mint": "铸造勋章",
+        "claim": "领取勋章"
+      },
+      "fields": {
+        "action": "动作",
+        "network": "网络",
+        "medal": "勋章",
+        "wallet": "钱包",
+        "package": "合约包",
+        "object": "对象",
+        "gasBudget": "Gas 预算",
+        "storageRebate": "Storage 返还"
+      },
+      "checklist": {
+        "prepare": {
+          "label": "PTB 范围",
+          "detail": "这笔交易块会围绕 {medalTitle}、目标 registry/template 对象和当前钱包来组装。"
+        },
+        "sign": {
+          "label": "钱包授权",
+          "detail": "必须先显式确认钱包意图，再对交易字节签名，然后才会进入广播阶段。"
+        },
+        "finalize": {
+          "label": "浏览器回执",
+          "detail": "广播并完成 checkpoint 后，界面会保留 digest、object、gas 和 settlement 面板供继续查看。"
+        }
+      }
+    },
+    "events": {
+      "proofVerified": {
+        "label": "证据已验证",
+        "detail": "{medalTitle} 的 Chronicle 证明材料已经通过校验，并被纳入本次交易计划。"
+      },
+      "transactionAssembled": {
+        "label": "交易已组装",
+        "detail": "PTB 已经围绕 registry、template 和目标钱包组装完成。"
+      },
+      "walletApproved": {
+        "label": "钱包已授权",
+        "detail": "钱包已经确认签名，这笔 payload 已进入可广播状态。"
+      },
+      "medalBound": {
+        "label": "勋章已绑定",
+        "detail": "{medalTitle} 已写入 soulbound medal object，并绑定到目标钱包。"
+      },
+      "claimTicketConsumed": {
+        "label": "Claim ticket 已消耗",
+        "detail": "这张 mock claim ticket 已标记为已使用，避免同一份 claim 被重复执行。"
+      }
+    },
+    "objectChanges": {
+      "roles": {
+        "medal": "勋章对象",
+        "registry": "注册表对象",
+        "template": "模板对象",
+        "claimTicket": "claim ticket"
+      },
+      "kinds": {
+        "created": "已创建",
+        "mutated": "已变更",
+        "transferred": "已转移",
+        "deleted": "已删除"
+      },
+      "owner": "所有者 // {owner}",
+      "ownerDeleted": "所有者 // 已删除"
+    },
+    "stages": {
+      "mint": {
+        "prepare": {
+          "label": "组装 Mint PTB",
+          "detail": "为 {medalTitle} 组装 public mint 调用，锁定 template object 和接收钱包。"
+        },
+        "simulate": {
+          "label": "Dry Run",
+          "detail": "先预执行 Move 调用，估算签名前的 gas、对象写入和 storage rebate。"
+        },
+        "sign": {
+          "label": "钱包签名",
+          "detail": "模拟钱包确认和交易签名，让 payload 进入可广播状态。"
+        },
+        "submit": {
+          "label": "广播交易",
+          "detail": "把签名后的交易广播进 mock testnet mempool，等待排序和打包。"
+        },
+        "finalize": {
+          "label": "铸造完成",
+          "detail": "checkpoint 已确认，medal object 写入完成，所有权已绑定到当前钱包。"
+        }
+      },
+      "claim": {
+        "prepare": {
+          "label": "校验证据",
+          "detail": "先为 {medalTitle} 校验 claim ticket、proof digest 和 signer payload，再组装交易。"
+        },
+        "simulate": {
+          "label": "组装 Claim PTB",
+          "detail": "围绕 registry、claim ticket 和目标钱包组装 claim 交易块。"
+        },
+        "sign": {
+          "label": "钱包签名",
+          "detail": "模拟钱包确认和 claim payload 签名。"
+        },
+        "submit": {
+          "label": "广播交易",
+          "detail": "把签名后的 claim 交易提交到 mock mempool，等待区块执行。"
+        },
+        "finalize": {
+          "label": "领取结算完成",
+          "detail": "checkpoint 已确认，勋章绑定状态完成更新，可以继续分享。"
+        }
+      }
+    },
+    "home": {
+      "eyebrow": "链上勋章流程",
+      "title": "首页也该提前讲清楚同一套钱包到 explorer 的语言。",
+      "body": "在真正点开钱包之前，产品就应该先把 Chronicle 和 Warrior 里会看到的同一套顺序讲明白：先组装交易，再走钱包确认，再广播，最后落到公开可分享的回执。",
+      "steps": {
+        "prepare": "玩家先看清楚自己到底在发起什么勋章动作，为什么要组这笔交易。",
+        "sign": "授权必须显式出现，钱包步骤要像真钱包一样像个门，而不是偷偷转个圈。",
+        "submit": "确认以后，交易需要经历广播阶段，不能直接瞬移到成功。",
+        "finalize": "最后落地的是一张可分享的 explorer 风格回执，里面有 digest、checkpoint、gas 和 object。"
+      }
+    },
+    "share": {
+      "eyebrow": "mock 社交接力",
+      "body": "这个分享层是同一条 mock 链上流程的自然后续。先完成勋章结算，再把结果封装成卡片，最后把流量送进社交渠道。",
+      "launchTitle": "分享跳转链接",
+      "receiptTitle": "关联交易回执",
+      "receiptAction": "已结算动作",
+      "notes": {
+        "handoff": "二维码和分享链接会重新打开实时勋章验证页，所以这层分享仍然挂着 live state，不会停在一张死图上。",
+        "social": "X、Telegram 和 Discord 都属于同一条 mint 之后的传播接力，体验上应该是一条完整流程，而不是另开一段 demo。"
+      },
+      "steps": {
+        "receiptLocked": {
+          "label": "回执已锁定",
+          "detail": "{medalTitle} 已经拥有一份结算完成的交易回执，所以分享资产能指回一个明确的链上式结果。"
+        },
+        "assetPrepared": {
+          "label": "素材已打包",
+          "detail": "卡片渲染层会把勋章状态、二维码入口和社交预览尺寸打成一份可复用的分发素材。"
+        },
+        "socialHandoff": {
+          "label": "社交接力",
+          "detail": "平台按钮从勋章回执上下文直接发起，不再切到一段割裂的 demo 叙事。"
+        }
+      }
+    }
+  },
   "medalShareDialog": {
     "closeAria": "关闭勋章分享弹窗",
     "close": "关闭",
@@ -503,6 +695,27 @@
         "label": "航线账本",
         "progress": "{current} / 10 次已验证星门跃迁",
         "detail": "跃迁次数是物流与航线活跃度最直观的 Frontier 信号。"
+      }
+    },
+    "card": {
+      "status": {
+        "bound": "已绑定",
+        "ready": "可执行",
+        "verified": "已验证",
+        "tracking": "追踪中",
+        "awaitChain": "等待上链",
+        "locked": "未解锁"
+      },
+      "detail": {
+        "bound": "这枚勋章已经绑定到当前钱包。",
+        "mintReady": "门槛已经满足，现在可以直接走 public mint，把勋章写进钱包。",
+        "claimReady": "门槛已经满足，链上 claim 通道已经就绪，可以直接执行。",
+        "verified": "门槛已经到位，但当前链上绑定路径还没激活。",
+        "tracking": "条件还没凑满，继续在 Frontier 留下可验证轨迹。"
+      },
+      "actions": {
+        "submitting": "提交中...",
+        "shareCard": "分享卡片"
       }
     }
   }

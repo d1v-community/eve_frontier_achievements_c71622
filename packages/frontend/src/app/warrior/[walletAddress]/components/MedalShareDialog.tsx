@@ -2,6 +2,7 @@
 
 import { useLocale, useTranslations } from 'next-intl'
 import { useEffect, useState } from 'react'
+import type { MockMedalTxReceipt } from '~~/chronicle/mock/mockTransaction'
 import type { ChronicleMedalState } from '~~/chronicle/types'
 import { notification } from '~~/helpers/notification'
 import type { ENetwork } from '~~/types/ENetwork'
@@ -26,6 +27,7 @@ interface MedalShareDialogProps {
   network: ENetwork
   isMockMode?: boolean
   mockClaimedSlugs?: string[]
+  mockReceipt?: MockMedalTxReceipt | null
   onClose: () => void
 }
 
@@ -35,11 +37,14 @@ export default function MedalShareDialog({
   network,
   isMockMode = false,
   mockClaimedSlugs,
+  mockReceipt,
   onClose,
 }: MedalShareDialogProps) {
   const [previewVariant, setPreviewVariant] = useState<ImageVariant>('opengraph')
   const locale = useLocale()
   const t = useTranslations('medalShareDialog')
+  const mockT = useTranslations('mockFlow')
+  const shareT = useTranslations('mockFlow.share')
 
   useEffect(() => {
     const previousOverflow = document.body.style.overflow
@@ -83,6 +88,7 @@ export default function MedalShareDialog({
   const xShareUrl = `https://twitter.com/intent/tweet?url=${encodeURIComponent(shareUrl)}&text=${encodeURIComponent(shareText)}`
   const telegramShareUrl = `https://t.me/share/url?url=${encodeURIComponent(shareUrl)}&text=${encodeURIComponent(shareText)}`
   const discordShareUrl = 'https://discord.com/channels/@me'
+  const dialogBody = isMockMode ? shareT('body') : t('body')
 
   const trackShare = async (platform: string) => {
     try {
@@ -191,9 +197,43 @@ export default function MedalShareDialog({
                 {medal.title}
               </p>
               <p className="text-white/68 mt-5 max-w-xl text-sm leading-7">
-                {t('body')}
+                {dialogBody}
               </p>
             </div>
+
+            {isMockMode ? (
+              <div
+                className="rounded-[1.2rem] border px-4 py-4"
+                style={{
+                  borderColor: 'rgba(240,100,47,0.16)',
+                  background:
+                    'linear-gradient(180deg, rgba(240,100,47,0.08), rgba(255,255,255,0.03))',
+                }}
+              >
+                <div className="font-mono text-[0.62rem] uppercase tracking-[0.3em] text-[#f0642f]">
+                  {shareT('eyebrow')}
+                </div>
+                <div className="mt-4 grid gap-3">
+                  {([
+                    'receiptLocked',
+                    'assetPrepared',
+                    'socialHandoff',
+                  ] as const).map((step) => (
+                    <div
+                      key={step}
+                      className="border border-white/10 bg-black/18 px-4 py-4"
+                    >
+                      <div className="font-mono text-[0.6rem] uppercase tracking-[0.22em] text-[#ffd2c2]">
+                        {shareT(`steps.${step}.label`)}
+                      </div>
+                      <div className="mt-2 text-xs leading-6 text-[#f4efe2]/68">
+                        {shareT(`steps.${step}.detail`, { medalTitle: medal.title })}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ) : null}
 
             <div className="grid gap-3 sm:grid-cols-2">
               {[
@@ -262,7 +302,7 @@ export default function MedalShareDialog({
                 background: 'rgba(255,255,255,0.03)',
               }}
             >
-              {t('notes.qr')}
+              {isMockMode ? shareT('notes.handoff') : t('notes.qr')}
             </div>
 
             <div
@@ -272,7 +312,7 @@ export default function MedalShareDialog({
                 background: 'rgba(255,255,255,0.03)',
               }}
             >
-              {t('notes.discord')}
+              {isMockMode ? shareT('notes.social') : t('notes.discord')}
             </div>
 
             <div
@@ -284,7 +324,7 @@ export default function MedalShareDialog({
               }}
             >
               <div className="font-mono text-[0.62rem] uppercase tracking-[0.3em] text-[#f0642f]">
-                {t('shareLinks')}
+                {isMockMode ? shareT('launchTitle') : t('shareLinks')}
               </div>
               <div className="mt-4 grid gap-3">
                 {[
@@ -333,6 +373,46 @@ export default function MedalShareDialog({
                 </button>
               ))}
             </div>
+            {isMockMode && mockReceipt ? (
+              <div
+                className="rounded-[1.2rem] border px-4 py-4"
+                style={{
+                  borderColor: 'rgba(240,100,47,0.16)',
+                  background:
+                    'linear-gradient(180deg, rgba(240,100,47,0.08), rgba(255,255,255,0.03))',
+                }}
+              >
+                <div className="font-mono text-[0.62rem] uppercase tracking-[0.3em] text-[#f0642f]">
+                  {shareT('receiptTitle')}
+                </div>
+                <div className="mt-4 grid gap-2 text-xs leading-6 text-[#f4efe2]/68 sm:grid-cols-2">
+                  <div>
+                    <span className="font-mono uppercase tracking-[0.14em] text-white/42">
+                      {mockT('fields.digest')}
+                    </span>{' '}
+                    {mockReceipt.digest}
+                  </div>
+                  <div>
+                    <span className="font-mono uppercase tracking-[0.14em] text-white/42">
+                      {mockT('fields.checkpoint')}
+                    </span>{' '}
+                    #{mockReceipt.checkpoint}
+                  </div>
+                  <div>
+                    <span className="font-mono uppercase tracking-[0.14em] text-white/42">
+                      {mockT('fields.object')}
+                    </span>{' '}
+                    {mockReceipt.objectId.slice(0, 18)}...
+                  </div>
+                  <div>
+                    <span className="font-mono uppercase tracking-[0.14em] text-white/42">
+                      {shareT('receiptAction')}
+                    </span>{' '}
+                    {mockT(`actions.${mockReceipt.action}`)}
+                  </div>
+                </div>
+              </div>
+            ) : null}
             <img
               src={imageUrl}
               alt={t('previewAlt', {

@@ -2,8 +2,11 @@
 
 import EveButton from '@eveworld/ui-components/components/EveButton'
 import EveLinearBar from '@eveworld/ui-components/components/EveLinearBar'
+import { useTranslations } from 'next-intl'
 import type { ChronicleMedalState } from '~~/chronicle/types'
+import type { MockMedalTxReceipt } from '../mock/mockTransaction'
 import { getMedalDefinitionByKind } from '../config/medals'
+import MockTransactionPanel from './MockTransactionPanel'
 
 const TONE_STYLES = {
   crimson: {
@@ -48,34 +51,43 @@ const MedalCard = ({
   isClaiming,
   onAction,
   actionLabel,
+  actionKind,
   onShare,
+  mockTransaction,
+  mockReceipt,
 }: {
   medal: ChronicleMedalState
   isClaiming: boolean
   onAction: () => void
   actionLabel: string | null
+  actionKind?: 'mint' | 'claim' | null
   onShare?: (() => void) | null
+  mockTransaction?: MockMedalTxReceipt | null
+  mockReceipt?: MockMedalTxReceipt | null
 }) => {
+  const t = useTranslations('chronicleDashboard.card')
   const definition = getMedalDefinitionByKind(medal.kind)
   const tone = definition ? TONE_STYLES[definition.tone] : TONE_STYLES.azure
 
   const status = medal.claimed
-    ? 'Bound'
+    ? t('status.bound')
     : medal.claimable
-      ? 'Ready'
+      ? t('status.ready')
       : medal.unlocked
-        ? 'Verified'
-        : 'Tracking'
+        ? t('status.verified')
+        : t('status.tracking')
 
   const statusDetail = medal.claimed
-    ? '该奖章已经绑定到当前钱包。'
-    : actionLabel === 'Mint Medal'
-      ? '条件满足，当前可以直接走公开 mint，把这枚奖章铸到钱包里。'
+    ? t('detail.bound')
+    : actionKind === 'mint'
+      ? t('detail.mintReady')
       : medal.claimable
-      ? '条件满足，可以立即发起链上 Claim。'
+      ? t('detail.claimReady')
       : medal.unlocked
-        ? '门槛已经到位，但当前链上领取通道还没就绪。'
-        : '条件尚未满足，继续在边境留下可验证轨迹。'
+        ? t('detail.verified')
+        : t('detail.tracking')
+
+  const transactionSnapshot = mockTransaction ?? mockReceipt ?? null
 
   return (
     <article
@@ -134,6 +146,14 @@ const MedalCard = ({
         </div>
       </div>
 
+      {transactionSnapshot ? (
+        <MockTransactionPanel
+          receipt={transactionSnapshot}
+          isRunning={Boolean(mockTransaction)}
+          className="mt-5"
+        />
+      ) : null}
+
       <div className="mt-5 flex items-start justify-between gap-4">
         <div className="text-white/68 min-h-10 flex-1 text-sm leading-7">
           {statusDetail}
@@ -148,7 +168,7 @@ const MedalCard = ({
                 disabled={isClaiming}
                 onClick={() => onAction()}
               >
-                {isClaiming ? 'Submitting...' : actionLabel}
+                {isClaiming ? t('actions.submitting') : actionLabel}
               </EveButton>
             ) : null}
             {onShare ? (
@@ -157,17 +177,17 @@ const MedalCard = ({
                 onClick={() => onShare()}
                 className="border border-white/12 bg-white/6 px-4 py-3 text-left font-mono text-[0.68rem] uppercase tracking-[0.22em] text-white/78 transition-transform hover:-translate-y-0.5 hover:bg-white/10"
               >
-                Share Card
+                {t('actions.shareCard')}
               </button>
             ) : null}
           </div>
         ) : (
           <div className="bg-black/14 border border-white/10 px-4 py-2 font-mono text-[0.62rem] uppercase tracking-[0.22em] text-white/65">
             {medal.claimed
-              ? 'Bound'
+              ? t('status.bound')
               : medal.unlocked
-                ? 'Await Chain'
-                : 'Locked'}
+                ? t('status.awaitChain')
+                : t('status.locked')}
           </div>
         )}
       </div>

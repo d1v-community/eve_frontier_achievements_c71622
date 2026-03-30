@@ -4,6 +4,13 @@ import { useLocale, useTranslations } from 'next-intl'
 import { useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import type { ChronicleMedalState } from '~~/chronicle/types'
+import {
+  createMockMedalReceipt,
+  type MockMedalTxReceipt,
+  runMockMedalTransaction,
+} from '~~/chronicle/mock/mockTransaction'
+import MockTransactionPanel from '~~/chronicle/components/MockTransactionPanel'
+import MockWalletConfirmDialog from '~~/chronicle/components/MockWalletConfirmDialog'
 import { withLocale } from '~~/i18n/pathnames'
 import type { ENetwork } from '~~/types/ENetwork'
 import { resolveMockClaimedSlugs } from '~~/warrior/share'
@@ -15,6 +22,10 @@ interface MedalRosterProps {
   network: ENetwork
   isMockMode?: boolean
 }
+type PendingMintAction = {
+  medal: ChronicleMedalState
+  receipt: MockMedalTxReceipt
+} | null
 
 const TONE_COLORS: Record<string, { active: string; glow: string }> = {
   crimson: { active: '#e63946', glow: 'rgba(230,57,70,0.35)' },
@@ -98,7 +109,15 @@ export default function MedalRoster({
   const t = useTranslations('medalRoster')
   const [selectedMedal, setSelectedMedal] = useState<ChronicleMedalState | null>(null)
   const [mintingSlug, setMintingSlug] = useState<string | null>(null)
+  const [mockTransaction, setMockTransaction] = useState<MockMedalTxReceipt | null>(
+    null
+  )
+  const [latestReceipt, setLatestReceipt] = useState<MockMedalTxReceipt | null>(null)
+  const [mockReceipts, setMockReceipts] = useState<Record<string, MockMedalTxReceipt>>(
+    {}
+  )
   const [localClaimedSlugs, setLocalClaimedSlugs] = useState<Set<string>>(new Set())
+  const [pendingMintAction, setPendingMintAction] = useState<PendingMintAction>(null)
 
   const isEffectivelyClaimed = (medal: ChronicleMedalState) =>
     medal.claimed || localClaimedSlugs.has(medal.slug)
@@ -108,20 +127,48 @@ export default function MedalRoster({
     return [...new Set([...fromUrl, ...Array.from(localClaimedSlugs)])]
   }
 
-  const runMockMint = (medal: ChronicleMedalState) => {
+  const runMockMint = async (
+    medal: ChronicleMedalState,
+    receipt: MockMedalTxReceipt
+  ) => {
     setMintingSlug(medal.slug)
-    setTimeout(() => {
+    setMockTransaction(receipt)
+
+    try {
+      const finalizedReceipt = await runMockMedalTransaction({
+        slug: medal.slug,
+        action: 'mint',
+        medalTitle: medal.title,
+        receipt,
+        onUpdate: (nextReceipt) => {
+          setMockTransaction(nextReceipt)
+        },
+      })
+
+      setMockTransaction(null)
+      setLatestReceipt(finalizedReceipt)
+      setMockReceipts((prev) => ({
+        ...prev,
+        [medal.slug]: finalizedReceipt,
+      }))
       setMintingSlug(null)
       setLocalClaimedSlugs((prev) => new Set([...prev, medal.slug]))
+
       // Persist to URL so the state survives a refresh
       const claimed = resolveMockClaimedSlugs(searchParams.get('claimed') ?? undefined)
       const next = new URLSearchParams(searchParams.toString())
       next.set('claimed', [...new Set([...claimed, medal.slug])].join(','))
       router.replace(withLocale(locale, `/warrior/${walletAddress}?${next.toString()}`))
+
       // Open share dialog with the medal marked as claimed
       setSelectedMedal({ ...medal, claimed: true })
-    }, 1500)
+    } catch {
+      setMockTransaction(null)
+      setMintingSlug(null)
+    }
   }
+
+  const rosterTransaction = mockTransaction ?? latestReceipt
 
   return (
     <>
@@ -132,14 +179,26 @@ export default function MedalRoster({
         >
           {t('title')}
         </p>
+        {isMockMode && rosterTransaction ? (
+          <MockTransactionPanel
+            receipt={rosterTransaction}
+            isRunning={Boolean(mockTransaction)}
+          />
+        ) : null}
         <div className="flex flex-wrap items-center gap-4">
           {medals.map((medal) => {
             const effectivelyClaimed = isEffectivelyClaimed(medal)
             const isMinting = mintingSlug === medal.slug
-            const canMockMint = isMockMode && medal.unlocked && !effectivelyClaimed && !isMinting
+            const canMockMint =
+              isMockMode &&
+              medal.unlocked &&
+              !effectivelyClaimed &&
+              mintingSlug == null &&
+              !isMinting
             const active = effectivelyClaimed || medal.unlocked
             const tone = MEDAL_TONE_MAP[medal.slug] || 'steel'
             const { active: color } = TONE_COLORS[tone]
+            const receipt = mockReceipts[medal.slug]
 
             return (
               <button
@@ -150,13 +209,33 @@ export default function MedalRoster({
                 disabled={!effectivelyClaimed && !canMockMint}
                 onClick={() => {
                   if (effectivelyClaimed) {
-                    setSelectedMedal({ ...medal, claimed: true })
+                    const receiptProof = receipt
+                      ? `digest ${receipt.digest.slice(0, 14)}... · checkpoint #${receipt.checkpoint}`
+                      : null
+
+                    setSelectedMedal({
+                      ...medal,
+                      claimed: true,
+                      proof: medal.proof
+                        ? receiptProof
+                          ? `${medal.proof} · ${receiptProof}`
+                          : medal.proof
+                        : receiptProof,
+                    })
                   } else if (canMockMint) {
-                    runMockMint(medal)
+                    setPendingMintAction({
+                      medal,
+                      receipt: createMockMedalReceipt({
+                        slug: medal.slug,
+                        action: 'mint',
+                        medalTitle: medal.title,
+                        walletAddress,
+                      }),
+                    })
                   }
                 }}
                 style={{
-                  cursor: (effectivelyClaimed || canMockMint) ? 'pointer' : 'default',
+                  cursor: effectivelyClaimed || canMockMint ? 'pointer' : 'default',
                 }}
               >
                 <div
@@ -247,9 +326,28 @@ export default function MedalRoster({
           network={network}
           isMockMode={isMockMode}
           mockClaimedSlugs={getAllClaimedSlugs()}
+          mockReceipt={mockReceipts[selectedMedal.slug] ?? null}
           onClose={() => setSelectedMedal(null)}
         />
       ) : null}
+      <MockWalletConfirmDialog
+        open={pendingMintAction != null}
+        action={pendingMintAction ? 'mint' : null}
+        medalTitle={pendingMintAction?.medal.title ?? null}
+        walletAddress={walletAddress}
+        network={network.toUpperCase()}
+        receipt={pendingMintAction?.receipt ?? null}
+        onClose={() => setPendingMintAction(null)}
+        onConfirm={() => {
+          if (!pendingMintAction) {
+            return
+          }
+
+          const { medal, receipt } = pendingMintAction
+          setPendingMintAction(null)
+          void runMockMint(medal, receipt)
+        }}
+      />
     </>
   )
 }

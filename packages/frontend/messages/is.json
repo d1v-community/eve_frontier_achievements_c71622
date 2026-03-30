@@ -285,6 +285,198 @@
       "noShare": "Engin deiling"
     }
   },
+  "mockFlow": {
+    "actions": {
+      "mint": "Mint Medal",
+      "claim": "Claim Medal"
+    },
+    "statuses": {
+      "running": "running",
+      "done": "done",
+      "queued": "queued"
+    },
+    "panel": {
+      "pipeline": "mock chain pipeline",
+      "receipt": "mock chain receipt",
+      "step": "step {current} / {total}",
+      "explorerTitle": "mock explorer receipt",
+      "explorerBody": "The chain interaction is still mocked, but this panel exposes the same transaction checkpoints, objects, and gas surfaces the real explorer flow should reveal.",
+      "pending": "pending finality",
+      "finalized": "checkpoint finalized"
+    },
+    "sections": {
+      "events": "events",
+      "objectChanges": "object changes"
+    },
+    "fields": {
+      "digest": "digest",
+      "checkpoint": "checkpoint",
+      "package": "package",
+      "object": "object",
+      "gasBudget": "gas budget",
+      "gasUsed": "gas used",
+      "storageRebate": "storage rebate",
+      "updatedAt": "updated at"
+    },
+    "wallet": {
+      "eyebrow": "mock wallet approval",
+      "title": "Approve {action}",
+      "body": "Confirm the mock wallet request for {medalTitle}. Once approved, the interface will run the staged {action} pipeline, then settle into an explorer-style receipt.",
+      "close": "Close",
+      "cancel": "Cancel",
+      "confirm": "Approve {action}",
+      "estimateTitle": "estimated transaction footprint",
+      "note": "This is still a mock wallet surface. It does not touch a live chain, but it mirrors the approval rhythm a real wallet should expose before sign-and-submit.",
+      "actions": {
+        "mint": "Mint Medal",
+        "claim": "Claim Medal"
+      },
+      "fields": {
+        "action": "Action",
+        "network": "Network",
+        "medal": "Medal",
+        "wallet": "Wallet",
+        "package": "Package",
+        "object": "Object",
+        "gasBudget": "Gas budget",
+        "storageRebate": "Storage rebate"
+      },
+      "checklist": {
+        "prepare": {
+          "label": "PTB scope",
+          "detail": "The transaction block is assembled around {medalTitle}, the target registry/template objects, and the current wallet."
+        },
+        "sign": {
+          "label": "Wallet approval",
+          "detail": "The wallet confirms intent first, then signs the transaction bytes before any broadcast step begins."
+        },
+        "finalize": {
+          "label": "Explorer receipt",
+          "detail": "After broadcast and checkpoint finality, the UI preserves digest, object, gas, and settlement surfaces for review."
+        }
+      }
+    },
+    "events": {
+      "proofVerified": {
+        "label": "Proof verified",
+        "detail": "Chronicle proof material for {medalTitle} has been validated and accepted into the transaction plan."
+      },
+      "transactionAssembled": {
+        "label": "Transaction assembled",
+        "detail": "The PTB has been composed with the required registry, template, and wallet targets."
+      },
+      "walletApproved": {
+        "label": "Wallet approved",
+        "detail": "The wallet has approved signing, so the payload is ready for broadcast."
+      },
+      "medalBound": {
+        "label": "Medal bound",
+        "detail": "{medalTitle} has been written into a soulbound medal object and linked to the destination wallet."
+      },
+      "claimTicketConsumed": {
+        "label": "Claim ticket consumed",
+        "detail": "The mock claim ticket has been marked as spent so the same claim cannot execute twice."
+      }
+    },
+    "objectChanges": {
+      "roles": {
+        "medal": "medal object",
+        "registry": "registry object",
+        "template": "template object",
+        "claimTicket": "claim ticket"
+      },
+      "kinds": {
+        "created": "created",
+        "mutated": "mutated",
+        "transferred": "transferred",
+        "deleted": "deleted"
+      },
+      "owner": "owner // {owner}",
+      "ownerDeleted": "owner // deleted"
+    },
+    "stages": {
+      "mint": {
+        "prepare": {
+          "label": "Build Mint PTB",
+          "detail": "Assemble the public mint call for {medalTitle}, then lock the template object and recipient wallet."
+        },
+        "simulate": {
+          "label": "Dry Run",
+          "detail": "Pre-execute the Move call to estimate gas, object writes, and storage rebate before signing."
+        },
+        "sign": {
+          "label": "Wallet Sign",
+          "detail": "Simulate wallet approval and signature generation so the payload is ready for broadcast."
+        },
+        "submit": {
+          "label": "Broadcast Tx",
+          "detail": "Broadcast the signed transaction into the mock testnet mempool and wait for ordering."
+        },
+        "finalize": {
+          "label": "Mint Finalized",
+          "detail": "Checkpoint confirmation has landed. The medal object is written and ownership is bound to the current wallet."
+        }
+      },
+      "claim": {
+        "prepare": {
+          "label": "Verify Proof",
+          "detail": "Verify the claim ticket, proof digest, and signer payload for {medalTitle} before building the transaction."
+        },
+        "simulate": {
+          "label": "Build Claim PTB",
+          "detail": "Assemble the claim transaction block around the registry, claim ticket, and target wallet."
+        },
+        "sign": {
+          "label": "Wallet Sign",
+          "detail": "Simulate wallet approval and signature generation for the claim payload."
+        },
+        "submit": {
+          "label": "Broadcast Tx",
+          "detail": "Submit the signed claim transaction into the mock mempool and wait for execution ordering."
+        },
+        "finalize": {
+          "label": "Claim Settled",
+          "detail": "Checkpoint confirmation is complete. The medal bind state is updated and ready for sharing."
+        }
+      }
+    },
+    "home": {
+      "eyebrow": "on-chain medal flow",
+      "title": "The homepage should already speak the same wallet-to-explorer language.",
+      "body": "Even before a live wallet interaction begins, the product should explain the same sequence the user will later see in Chronicle and Warrior: build the transaction, approve in wallet, broadcast it, then settle into a public receipt.",
+      "steps": {
+        "prepare": "The player sees exactly what medal action is being assembled and why the transaction exists.",
+        "sign": "Approval is explicit. The wallet step should feel like a real sign gate instead of an invisible loading state.",
+        "submit": "Once approved, the transaction moves through a broadcast phase instead of teleporting straight to success.",
+        "finalize": "The final state is a shareable explorer-style receipt with digest, checkpoint, gas, and object surfaces."
+      }
+    },
+    "share": {
+      "eyebrow": "mock social handoff",
+      "body": "This share surface is the continuation of the same mock on-chain flow. The medal is settled first, then packaged into a reusable card and handed off into social channels.",
+      "launchTitle": "share launch links",
+      "receiptTitle": "linked transaction receipt",
+      "receiptAction": "settled action",
+      "notes": {
+        "handoff": "The QR path and share URL reopen the live medal verification page, so this share layer remains attached to live state instead of ending on a dead image.",
+        "social": "X, Telegram, and Discord are part of the same post-mint handoff. The narrative should feel like one flow, not a separate demo scene."
+      },
+      "steps": {
+        "receiptLocked": {
+          "label": "Receipt locked",
+          "detail": "{medalTitle} already has a settled transaction receipt, so the share asset can point back to a concrete on-chain-style outcome."
+        },
+        "assetPrepared": {
+          "label": "Asset prepared",
+          "detail": "The card renderer packages the medal state, QR path, and social preview format into a reusable distribution asset."
+        },
+        "socialHandoff": {
+          "label": "Social handoff",
+          "detail": "Platform actions launch directly from the medal receipt context instead of switching to a disconnected demo narrative."
+        }
+      }
+    }
+  },
   "medalShareDialog": {
     "closeAria": "Loka medalíu deilingarglugga",
     "close": "Loka",
@@ -503,6 +695,27 @@
         "label": "Transit Ledger",
         "progress": "{current} / 10 staðfest gate jumps",
         "detail": "Gate jumps eru skýrasta Frontier merkið fyrir flutninga og leiðarvirkni."
+      }
+    },
+    "card": {
+      "status": {
+        "bound": "Bound",
+        "ready": "Ready",
+        "verified": "Verified",
+        "tracking": "Tracking",
+        "awaitChain": "Await Chain",
+        "locked": "Locked"
+      },
+      "detail": {
+        "bound": "This medal is already bound to the current wallet.",
+        "mintReady": "Threshold complete. Public mint is available now, so this medal can be written directly into the wallet.",
+        "claimReady": "Threshold complete. The on-chain claim path is live and ready to execute.",
+        "verified": "The threshold is already satisfied, but the on-chain bind route is not active yet.",
+        "tracking": "The threshold is not full yet. Keep leaving verifiable Frontier traces."
+      },
+      "actions": {
+        "submitting": "Submitting...",
+        "shareCard": "Share Card"
       }
     }
   }
