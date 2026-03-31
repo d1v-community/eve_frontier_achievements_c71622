@@ -6,6 +6,8 @@
     "build": "sui move build -p ./move/medals",
     "test": "sui move test -p ./move/medals",
     "copy-package-id": "node ./scripts/copy-package-id",
+    "testnet:probe": "node ./scripts/chronicle-testnet-probe",
+    "testnet:register-signer": "node ./scripts/chronicle-testnet-register-signer",
     "localnet:start": "localnet start",
     "localnet:stop": "localnet stop",
     "localnet:status": "localnet status",
@@ -44,6 +46,7 @@
     "mainnet:deploy:no-dependency-check": "mainnet publish --path ${PWD}/move/medals && pnpm copy-package-id -n mainnet"
   },
   "devDependencies": {
+    "@mysten/sui": "^1.45.2",
     "env-file-rw": "^1.0.0",
     "sui-explorer-local": "^2.5.0"
   }

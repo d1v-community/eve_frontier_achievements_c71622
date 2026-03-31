@@ -48,6 +48,8 @@
     "testnet:status": "pnpm --filter contract testnet:status",
     "testnet:links": "pnpm --filter contract testnet:links",
     "testnet:update": "pnpm --filter contract testnet:update",
+    "testnet:probe": "pnpm --filter contract testnet:probe",
+    "testnet:register-signer": "pnpm --filter contract testnet:register-signer",
     "testnet:deploy": "pnpm --filter contract testnet:deploy",
     "testnet:deploy:no-dependency-check": "pnpm --filter contract testnet:deploy:no-dependency-check",
     "testnet:address": "pnpm --filter contract testnet:address",
