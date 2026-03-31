@@ -6,36 +6,40 @@ import { getMockRouteSnapshot } from '~~/server/chronicle/mockRouteSnapshot'
 import {
   buildFallbackWarriorShareCardModel,
   buildWarriorShareCardModel,
-  TWITTER_IMAGE_SIZE,
+  OG_IMAGE_SIZE,
 } from '~~/server/warrior/share'
 import { WarriorShareImage } from '~~/server/warrior/shareCard'
 import {
   isMockWarriorRoute,
   resolveMockClaimedSlugs,
   resolveWarriorNetwork,
-  type WarriorRouteSearchParams,
 } from '~~/warrior/share'
 
-export const alt = 'Frontier Chronicle warrior social preview'
-export const size = TWITTER_IMAGE_SIZE
-export const contentType = 'image/png'
 export const dynamic = 'force-dynamic'
 
-interface ImageProps {
-  params: Promise<{ walletAddress: string }>
-  searchParams?: Promise<WarriorRouteSearchParams | undefined>
-}
+const size = OG_IMAGE_SIZE
 
-export default async function Image({ params, searchParams }: ImageProps) {
+export async function GET(
+  request: Request,
+  { params }: { params: Promise<{ walletAddress: string }> }
+) {
   const locale = await getLocale()
   const { walletAddress } = await params
-  const resolvedSearchParams = (await searchParams) ?? {}
-  const { network: rawNetwork, m: rawMock, claimed: rawClaimed } =
-    resolvedSearchParams
-  const network = resolveWarriorNetwork(rawNetwork)
+  const { searchParams } = new URL(request.url)
+  const network = resolveWarriorNetwork(
+    searchParams.get('network') ?? undefined
+  )
+  const isMockMode = isMockWarriorRoute(searchParams.get('m') ?? undefined)
+  const claimedSlugs = resolveMockClaimedSlugs(
+    searchParams.get('claimed') ?? undefined
+  )
 
   if (!isValidSuiAddress(walletAddress)) {
-    const model = await buildFallbackWarriorShareCardModel(null, network, locale)
+    const model = await buildFallbackWarriorShareCardModel(
+      null,
+      network,
+      locale
+    )
 
     return new ImageResponse(
       <WarriorShareImage
@@ -48,13 +52,9 @@ export default async function Image({ params, searchParams }: ImageProps) {
   }
 
   try {
-    const snapshot = isMockWarriorRoute(rawMock)
-      ? getMockRouteSnapshot(
-          walletAddress,
-          network,
-          resolveMockClaimedSlugs(rawClaimed)
-        )
-      : await getChronicleSnapshot(walletAddress, network)
+    const snapshot = isMockMode
+      ? getMockRouteSnapshot(walletAddress, network, claimedSlugs, locale)
+      : await getChronicleSnapshot(walletAddress, network, locale)
     const model = await buildWarriorShareCardModel(snapshot, network, locale)
 
     return new ImageResponse(

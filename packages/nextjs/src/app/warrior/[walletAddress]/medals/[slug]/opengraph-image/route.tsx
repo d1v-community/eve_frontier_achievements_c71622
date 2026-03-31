@@ -11,30 +11,30 @@ import {
 } from '~~/server/warrior/medalShare'
 import { MedalShareImage } from '~~/server/warrior/medalShareCard'
 import {
-  type WarriorRouteSearchParams,
   isMockWarriorRoute,
   resolveMockClaimedSlugs,
   resolveWarriorNetwork,
 } from '~~/warrior/share'
 
-export const alt = 'Frontier Chronicle medal verification card'
-export const size = MEDAL_OG_IMAGE_SIZE
-export const contentType = 'image/png'
 export const dynamic = 'force-dynamic'
 
-interface ImageProps {
-  params: Promise<{ walletAddress: string; slug: string }>
-  searchParams?: Promise<WarriorRouteSearchParams | undefined>
-}
+const size = MEDAL_OG_IMAGE_SIZE
 
-export default async function Image({ params, searchParams }: ImageProps) {
+export async function GET(
+  request: Request,
+  { params }: { params: Promise<{ walletAddress: string; slug: string }> }
+) {
   const locale = await getLocale()
   const { walletAddress, slug } = await params
-  const resolvedSearchParams = (await searchParams) ?? {}
-  const { network: rawNetwork, m: rawMock, claimed: rawClaimed } =
-    resolvedSearchParams
-  const network = resolveWarriorNetwork(rawNetwork)
-  const definition = getMedalDefinitionBySlug(slug)
+  const { searchParams } = new URL(request.url)
+  const network = resolveWarriorNetwork(
+    searchParams.get('network') ?? undefined
+  )
+  const isMockMode = isMockWarriorRoute(searchParams.get('m') ?? undefined)
+  const claimedSlugs = resolveMockClaimedSlugs(
+    searchParams.get('claimed') ?? undefined
+  )
+  const definition = getMedalDefinitionBySlug(slug, locale)
 
   if (!isValidSuiAddress(walletAddress) || !definition) {
     const model = await buildFallbackMedalShareCardModel({
@@ -51,13 +51,9 @@ export default async function Image({ params, searchParams }: ImageProps) {
   }
 
   try {
-    const snapshot = isMockWarriorRoute(rawMock)
-      ? getMockRouteSnapshot(
-          walletAddress,
-          network,
-          resolveMockClaimedSlugs(rawClaimed)
-        )
-      : await getChronicleSnapshot(walletAddress, network)
+    const snapshot = isMockMode
+      ? getMockRouteSnapshot(walletAddress, network, claimedSlugs, locale)
+      : await getChronicleSnapshot(walletAddress, network, locale)
     const model = await buildMedalShareCardModel({
       snapshot,
       walletAddress,
