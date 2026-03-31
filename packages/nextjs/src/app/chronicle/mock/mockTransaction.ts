@@ -9,6 +9,13 @@ import { fullFunctionName } from '~~/helpers/network'
 import { ENetwork } from '~~/types/ENetwork'
 import { getMedalDefinitionBySlug, type MedalSlug } from '../config/medals'
 import type { ChronicleClaimTicket } from '../types'
+import {
+  createMockClaimTicket,
+  createMockDigest,
+  createMockHex,
+  createMockObjectId,
+  pickMockRange,
+} from './mockArtifacts'
 
 export type MockMedalTxAction = 'mint' | 'claim'
 export type MockMedalTxStageId =
@@ -123,16 +130,6 @@ export interface MockMedalTxReceipt {
 const sleep = (durationMs: number) =>
   new Promise((resolve) => setTimeout(resolve, durationMs))
 
-const randomHex = (length: number) => {
-  let output = ''
-
-  while (output.length < length) {
-    output += Math.floor(Math.random() * 16).toString(16)
-  }
-
-  return output.slice(0, length)
-}
-
 const decodeBase64 = (value: string) => {
   try {
     if (typeof atob === 'function') {
@@ -155,14 +152,11 @@ const hexFromBase64 = (value: string, fallbackBytes: number) => {
   const bytes = decodeBase64(value)
 
   if (!bytes || bytes.length !== fallbackBytes) {
-    return `0x${randomHex(fallbackBytes * 2)}`
+    return `0x${createMockHex(fallbackBytes, 'mock-base64-fallback', fallbackBytes, value)}`
   }
 
   return `0x${Array.from(bytes, (byte) => byte.toString(16).padStart(2, '0')).join('')}`
 }
-
-const randomMist = (min: number, max: number) =>
-  BigInt(min + Math.floor(Math.random() * (max - min + 1)))
 
 const formatMist = (value: bigint) => `${value.toString()} MIST`
 
@@ -191,7 +185,7 @@ const resolveMockPackageId = (network: ENetwork, packageId?: string | null) => {
     return configured
   }
 
-  return `0x${'9'.repeat(64)}`
+  return createMockObjectId('mock-package', network)
 }
 
 const SUI_CLOCK_OBJECT_ID = '0x6'
@@ -216,14 +210,23 @@ const buildStages = (action: MockMedalTxAction): MockMedalTxStage[] => {
   ]
 }
 
-const buildGasSummary = () => {
-  const computationCost = randomMist(28_000_000, 56_000_000)
-  const storageCost = randomMist(4_000_000, 9_000_000)
-  const storageRebate = randomMist(2_000_000, 6_000_000)
-  const nonRefundableStorageFee = randomMist(120_000, 480_000)
+const buildGasSummary = (seed: string) => {
+  const computationCost = BigInt(
+    pickMockRange(28_000_000, 56_000_000, seed, 'computation')
+  )
+  const storageCost = BigInt(
+    pickMockRange(4_000_000, 9_000_000, seed, 'storage')
+  )
+  const storageRebate = BigInt(
+    pickMockRange(2_000_000, 6_000_000, seed, 'rebate')
+  )
+  const nonRefundableStorageFee = BigInt(
+    pickMockRange(120_000, 480_000, seed, 'non-refundable')
+  )
   const gasUsed = computationCost + storageCost - storageRebate
-  const gasBudget = gasUsed + randomMist(20_000_000, 45_000_000)
-  const gasPrice = randomMist(750, 1250)
+  const gasBudget =
+    gasUsed + BigInt(pickMockRange(20_000_000, 45_000_000, seed, 'budget'))
+  const gasPrice = BigInt(pickMockRange(750, 1250, seed, 'price'))
 
   return {
     gasPrice: formatMist(gasPrice),
@@ -238,23 +241,14 @@ const buildGasSummary = () => {
 }
 
 const buildClaimPayload = (
-  claimTicket: ChronicleClaimTicket | null | undefined
+  claimTicket: ChronicleClaimTicket
 ): MockMedalTxClaimPayloadSummary => ({
   proofDigest: hexFromBase64(claimTicket?.proofDigestBase64 ?? '', 32),
-  evidenceUri:
-    claimTicket?.evidenceUri ??
-    `https://frontier-chronicle.vercel.app/mock/claim/${randomHex(16)}`,
-  issuedAtMs:
-    claimTicket?.issuedAtMs ??
-    String(Date.now() - 2 * 60 * 1000),
-  deadlineMs:
-    claimTicket?.deadlineMs ??
-    String(Date.now() + 8 * 60 * 1000),
+  evidenceUri: claimTicket.evidenceUri,
+  issuedAtMs: claimTicket.issuedAtMs,
+  deadlineMs: claimTicket.deadlineMs,
   nonce: hexFromBase64(claimTicket?.nonceBase64 ?? '', 16),
-  signerPublicKey: hexFromBase64(
-    claimTicket?.signerPublicKeyBase64 ?? '',
-    32
-  ),
+  signerPublicKey: hexFromBase64(claimTicket?.signerPublicKeyBase64 ?? '', 32),
   signature: hexFromBase64(claimTicket?.signatureBase64 ?? '', 64),
 })
 
@@ -264,16 +258,18 @@ const buildCallArguments = ({
   registryObjectId,
   templateObjectId,
   claimPayload,
+  adminCapObjectId,
 }: {
   action: MockMedalTxAction
   recipient: string
   registryObjectId: string
   templateObjectId: string
   claimPayload: MockMedalTxClaimPayloadSummary | null
+  adminCapObjectId: string
 }): MockMedalTxCallArgument[] => {
   if (action === 'mint') {
     return [
-      { label: 'admin_cap', kind: 'object', value: `0x${'a'.repeat(64)}` },
+      { label: 'admin_cap', kind: 'object', value: adminCapObjectId },
       { label: 'registry', kind: 'object', value: registryObjectId },
       { label: 'template', kind: 'object', value: templateObjectId },
       { label: 'recipient', kind: 'pure', value: recipient },
@@ -287,14 +283,15 @@ const buildCallArguments = ({
     {
       label: 'proof_digest',
       kind: 'pure',
-      value: claimPayload?.proofDigest ?? `0x${randomHex(64)}`,
+      value:
+        claimPayload?.proofDigest ?? createMockDigest('claim-proof-fallback'),
     },
     {
       label: 'evidence_uri',
       kind: 'pure',
       value:
         claimPayload?.evidenceUri ??
-        `https://frontier-chronicle.vercel.app/mock/evidence/${randomHex(12)}`,
+        'https://frontier-chronicle.vercel.app/mock/evidence/unavailable',
     },
     {
       label: 'issued_at_ms',
@@ -309,17 +306,22 @@ const buildCallArguments = ({
     {
       label: 'nonce',
       kind: 'pure',
-      value: claimPayload?.nonce ?? `0x${randomHex(32)}`,
+      value:
+        claimPayload?.nonce ?? `0x${createMockHex(16, 'claim-nonce-fallback')}`,
     },
     {
       label: 'signer_public_key',
       kind: 'pure',
-      value: claimPayload?.signerPublicKey ?? `0x${randomHex(64)}`,
+      value:
+        claimPayload?.signerPublicKey ??
+        createMockDigest('claim-signer-fallback'),
     },
     {
       label: 'signature',
       kind: 'pure',
-      value: claimPayload?.signature ?? `0x${randomHex(128)}`,
+      value:
+        claimPayload?.signature ??
+        `0x${createMockObjectId('claim-signature-fallback').slice(2)}${createMockObjectId('claim-signature-tail').slice(2)}`,
     },
   ]
 }
@@ -430,27 +432,60 @@ export const createMockMedalReceipt = ({
   const stages = buildStages(action)
   const resolvedNetwork = network ?? ENetwork.TESTNET
   const resolvedPackageId = resolveMockPackageId(resolvedNetwork, packageId)
-  const sender = walletAddress ?? `0x${randomHex(64)}`
-  const medalObjectId = `0x${randomHex(64)}`
-  const gasPaymentObjectId = `0x${randomHex(64)}`
-  const resolvedRegistryObjectId = registryObjectId ?? `0x${'b'.repeat(64)}`
+  const createdAtMs = Date.now()
+  const receiptSalt = `${slug}:${action}:${createdAtMs}`
+  const sender =
+    walletAddress ??
+    createMockObjectId('mock-sender', resolvedNetwork, slug, action)
+  const medalObjectId = createMockObjectId(
+    'mock-medal-object',
+    resolvedNetwork,
+    slug,
+    action,
+    sender,
+    receiptSalt
+  )
+  const gasPaymentObjectId = createMockObjectId(
+    'mock-gas-payment',
+    resolvedNetwork,
+    sender,
+    receiptSalt
+  )
+  const adminCapObjectId = createMockObjectId('mock-admin-cap', resolvedNetwork)
+  const resolvedRegistryObjectId =
+    registryObjectId ?? createMockObjectId('mock-registry', resolvedNetwork)
   const resolvedTemplateObjectId =
     templateObjectId ??
     claimTicket?.templateObjectId ??
-    `0x${slug
-      .replace(/-/g, '')
-      .padEnd(64, String(definition?.kind ?? 0))
-      .slice(0, 64)}`
-  const templateVersion = claimTicket?.templateVersion ?? 1
-  const claimPayload = action === 'claim' ? buildClaimPayload(claimTicket) : null
+    createMockObjectId('mock-template', resolvedNetwork, slug)
+  const resolvedClaimTicket =
+    action === 'claim'
+      ? (claimTicket ??
+        (definition
+          ? createMockClaimTicket({
+              walletAddress: sender,
+              network: resolvedNetwork,
+              definition,
+              templateObjectId: resolvedTemplateObjectId,
+              issuedAtMs: createdAtMs - 90_000,
+            })
+          : null))
+      : null
+  const templateVersion = resolvedClaimTicket?.templateVersion ?? 1
+  const claimPayload = resolvedClaimTicket
+    ? buildClaimPayload(resolvedClaimTicket)
+    : null
   const callArguments = buildCallArguments({
     action,
     recipient: sender,
     registryObjectId: resolvedRegistryObjectId,
     templateObjectId: resolvedTemplateObjectId,
     claimPayload,
+    adminCapObjectId,
   })
-  const gas = buildGasSummary()
+  const gas = buildGasSummary(
+    `${resolvedNetwork}:${slug}:${action}:${sender}:${createdAtMs}`
+  )
   const functionName = action === 'claim' ? 'claim_medal' : 'admin_mint'
   const target = fullFunctionName(resolvedPackageId, functionName)
   const medalKind = definition?.kind ?? 0
@@ -464,11 +499,31 @@ export const createMockMedalReceipt = ({
     network: resolvedNetwork,
     sender,
     status: 'success',
-    epoch: String(480 + Math.floor(Math.random() * 16)),
+    epoch: String(
+      pickMockRange(480, 512, resolvedNetwork, slug, action, 'epoch')
+    ),
     stages,
     currentStageIndex: 0,
-    digest: `0x${randomHex(64)}`,
-    checkpoint: `${100000 + Math.floor(Math.random() * 900000)}`,
+    digest: createMockDigest(
+      'mock-transaction-digest',
+      resolvedNetwork,
+      slug,
+      action,
+      sender,
+      receiptSalt
+    ),
+    checkpoint: String(
+      pickMockRange(
+        100000,
+        999999,
+        resolvedNetwork,
+        slug,
+        action,
+        sender,
+        receiptSalt,
+        'checkpoint'
+      )
+    ),
     packageId: resolvedPackageId,
     module: 'medals',
     function: functionName,
@@ -510,7 +565,7 @@ export const createMockMedalReceipt = ({
       gasPaymentObjectId,
       owner: sender,
     }),
-    at: new Date().toISOString(),
+    at: new Date(createdAtMs).toISOString(),
   }
 }
 

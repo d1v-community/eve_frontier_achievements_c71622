@@ -114,7 +114,11 @@ const getMedalActionLabel = (
   return null
 }
 
-const ChronicleDashboard = ({ isMockMode = false }: { isMockMode?: boolean }) => {
+const ChronicleDashboard = ({
+  isMockMode = false,
+}: {
+  isMockMode?: boolean
+}) => {
   const locale = useLocale()
   const t = useTranslations('chronicleDashboard')
   const currentAccount = useCurrentAccount()
@@ -126,7 +130,7 @@ const ChronicleDashboard = ({ isMockMode = false }: { isMockMode?: boolean }) =>
     isPending,
     refetch,
     network: rawNetwork,
-  } = useChronicleSnapshot(currentAccount?.address, networkType)
+  } = useChronicleSnapshot(currentAccount?.address, networkType, locale)
   const { useNetworkVariable } = useNetworkConfig()
   const packageId = useNetworkVariable(CONTRACT_PACKAGE_VARIABLE_NAME)
   const explorerUrl = useNetworkVariable(EXPLORER_URL_VARIABLE_NAME)
@@ -139,10 +143,11 @@ const ChronicleDashboard = ({ isMockMode = false }: { isMockMode?: boolean }) =>
   const [mockTransactions, setMockTransactions] = useState<
     Record<string, MockMedalTxReceipt>
   >({})
-  const [mockReceipts, setMockReceipts] = useState<Record<string, MockMedalTxReceipt>>(
-    {}
-  )
-  const [pendingMockAction, setPendingMockAction] = useState<PendingMockAction>(null)
+  const [mockReceipts, setMockReceipts] = useState<
+    Record<string, MockMedalTxReceipt>
+  >({})
+  const [pendingMockAction, setPendingMockAction] =
+    useState<PendingMockAction>(null)
   const [localClaimedSlugs, setLocalClaimedSlugs] = useState<Set<string>>(
     new Set()
   )
@@ -154,9 +159,16 @@ const ChronicleDashboard = ({ isMockMode = false }: { isMockMode?: boolean }) =>
     return buildMockSnapshot(
       currentAccount.address,
       networkType as ENetwork,
-      localClaimedSlugs
+      localClaimedSlugs,
+      locale
     )
-  }, [isMockMode, currentAccount?.address, networkType, localClaimedSlugs])
+  }, [
+    isMockMode,
+    currentAccount?.address,
+    locale,
+    networkType,
+    localClaimedSlugs,
+  ])
 
   const data = isMockMode ? mockSnapshot : rawData
   const error = isMockMode ? null : rawError
@@ -291,18 +303,12 @@ const ChronicleDashboard = ({ isMockMode = false }: { isMockMode?: boolean }) =>
     }
 
     if (!isPackageConfigured) {
-      notification.error(
-        null,
-        t('errors.packageMissing')
-      )
+      notification.error(null, t('errors.packageMissing'))
       return
     }
 
     if (!data.profile.registryObjectId) {
-      notification.error(
-        null,
-        t('errors.registryMissing')
-      )
+      notification.error(null, t('errors.registryMissing'))
       return
     }
 
@@ -335,14 +341,14 @@ const ChronicleDashboard = ({ isMockMode = false }: { isMockMode?: boolean }) =>
               <h2 className="mt-4 font-display text-4xl uppercase tracking-[0.08em] text-[#f4efe2] sm:text-5xl">
                 {t('connect.title')}
               </h2>
-              <p className="mt-4 max-w-2xl text-base leading-7 text-[#f4efe2]/72 sm:text-lg">
+              <p className="text-[#f4efe2]/72 mt-4 max-w-2xl text-base leading-7 sm:text-lg">
                 {t('connect.body')}
               </p>
             </div>
 
             <div className="flex flex-wrap items-center gap-4">
               <CustomConnectButton />
-              <span className="border border-white/10 bg-black/16 px-4 py-3 font-mono text-[0.68rem] uppercase tracking-[0.22em] text-[#f4efe2]/68">
+              <span className="bg-black/16 text-[#f4efe2]/68 border border-white/10 px-4 py-3 font-mono text-[0.68rem] uppercase tracking-[0.22em]">
                 {t('connect.chip')}
               </span>
             </div>
@@ -363,13 +369,13 @@ const ChronicleDashboard = ({ isMockMode = false }: { isMockMode?: boolean }) =>
   if (error) {
     return (
       <div className="mx-auto w-full max-w-4xl px-4">
-        <div className="rounded-[1.8rem] border border-[#f04e3e]/32 bg-[#241211]/82 p-6 shadow-[0_24px_80px_rgba(0,0,0,0.2)]">
-            <div className="font-mono text-[0.62rem] uppercase tracking-[0.32em] text-[#ffb2a6]">
+        <div className="border-[#f04e3e]/32 bg-[#241211]/82 rounded-[1.8rem] border p-6 shadow-[0_24px_80px_rgba(0,0,0,0.2)]">
+          <div className="font-mono text-[0.62rem] uppercase tracking-[0.32em] text-[#ffb2a6]">
             {t('error.eyebrow')}
-            </div>
-            <div className="mt-3 font-display text-3xl uppercase tracking-[0.08em] text-[#ffe3df]">
+          </div>
+          <div className="mt-3 font-display text-3xl uppercase tracking-[0.08em] text-[#ffe3df]">
             {t('error.title')}
-            </div>
+          </div>
           <p className="mt-3 text-sm leading-7 text-[#ffd2cb]">
             {getDisplayErrorMessage(error, t)}
           </p>
@@ -423,15 +429,19 @@ const ChronicleDashboard = ({ isMockMode = false }: { isMockMode?: boolean }) =>
   const infrastructureComplete =
     data.metrics.networkNodeAnchors >= 1 || data.metrics.storageUnitAnchors >= 3
   const shareMedal =
-    shareSlug == null ? null : data.medals.find((medal) => medal.slug === shareSlug) ?? null
+    shareSlug == null
+      ? null
+      : (data.medals.find((medal) => medal.slug === shareSlug) ?? null)
   const priorityLoreMedals = data.medals
-    .filter((medal) => getMedalLoreBySlug(medal.slug, locale).priority === 'primary')
+    .filter(
+      (medal) => getMedalLoreBySlug(medal.slug, locale).priority === 'primary'
+    )
     .slice(0, 3)
 
   return (
     <section className="mx-auto flex w-full max-w-7xl flex-col gap-6 px-4 py-2">
       {isMockMode && (
-        <div className="overflow-hidden border border-[#d9a441]/42 bg-[linear-gradient(135deg,rgba(217,164,65,0.16),rgba(22,16,7,0.92),rgba(7,8,11,0.96))] shadow-[0_28px_90px_rgba(0,0,0,0.24)]">
+        <div className="border-[#d9a441]/42 overflow-hidden border bg-[linear-gradient(135deg,rgba(217,164,65,0.16),rgba(22,16,7,0.92),rgba(7,8,11,0.96))] shadow-[0_28px_90px_rgba(0,0,0,0.24)]">
           <div className="grid gap-5 px-5 py-5 lg:grid-cols-[0.9fr_1.1fr] lg:px-6">
             <div className="flex gap-3">
               <FlaskConicalIcon className="mt-1 h-5 w-5 shrink-0 text-[#d9a441]" />
@@ -442,7 +452,7 @@ const ChronicleDashboard = ({ isMockMode = false }: { isMockMode?: boolean }) =>
                 <div className="mt-3 font-display text-3xl uppercase tracking-[0.08em] text-[#f4efe2]">
                   {t('mock.title')}
                 </div>
-                <p className="mt-3 max-w-xl text-sm leading-7 text-[#f4efe2]/68">
+                <p className="text-[#f4efe2]/68 mt-3 max-w-xl text-sm leading-7">
                   {t('mock.body')}
                 </p>
               </div>
@@ -450,13 +460,25 @@ const ChronicleDashboard = ({ isMockMode = false }: { isMockMode?: boolean }) =>
 
             <div className="grid gap-3 md:grid-cols-3">
               {[
-                [t('mock.steps.one.time'), t('mock.steps.one.title'), t('mock.steps.one.detail')],
-                [t('mock.steps.two.time'), t('mock.steps.two.title'), t('mock.steps.two.detail')],
-                [t('mock.steps.three.time'), t('mock.steps.three.title'), t('mock.steps.three.detail')],
+                [
+                  t('mock.steps.one.time'),
+                  t('mock.steps.one.title'),
+                  t('mock.steps.one.detail'),
+                ],
+                [
+                  t('mock.steps.two.time'),
+                  t('mock.steps.two.title'),
+                  t('mock.steps.two.detail'),
+                ],
+                [
+                  t('mock.steps.three.time'),
+                  t('mock.steps.three.title'),
+                  t('mock.steps.three.detail'),
+                ],
               ].map(([time, title, detail]) => (
                 <div
                   key={title}
-                  className="border border-white/10 bg-black/18 px-4 py-4"
+                  className="bg-black/18 border border-white/10 px-4 py-4"
                 >
                   <div className="font-mono text-[0.62rem] uppercase tracking-[0.28em] text-[#f7d58a]">
                     {time}
@@ -464,7 +486,7 @@ const ChronicleDashboard = ({ isMockMode = false }: { isMockMode?: boolean }) =>
                   <div className="mt-3 text-sm font-semibold uppercase tracking-[0.08em] text-[#f4efe2]">
                     {title}
                   </div>
-                  <div className="mt-2 text-sm leading-6 text-[#f4efe2]/62">
+                  <div className="text-[#f4efe2]/62 mt-2 text-sm leading-6">
                     {detail}
                   </div>
                 </div>
@@ -479,12 +501,18 @@ const ChronicleDashboard = ({ isMockMode = false }: { isMockMode?: boolean }) =>
             {isMockMode && (
               <StatusPill tone="amber">{t('status.mockMode')}</StatusPill>
             )}
-            <StatusPill tone={data.profile.scanMode === 'authenticated' ? 'success' : 'amber'}>
+            <StatusPill
+              tone={
+                data.profile.scanMode === 'authenticated' ? 'success' : 'amber'
+              }
+            >
               {data.profile.scanMode === 'authenticated'
                 ? t('status.deepScan')
                 : t('status.previewScan')}
             </StatusPill>
-            <StatusPill tone="steel">{(network ?? '…').toUpperCase()}</StatusPill>
+            <StatusPill tone="steel">
+              {(network ?? '…').toUpperCase()}
+            </StatusPill>
             <StatusPill tone={claimableMedals.length > 0 ? 'martian' : 'steel'}>
               {claimableMedals.length > 0
                 ? t('status.readyNow', { count: claimableMedals.length })
@@ -496,7 +524,7 @@ const ChronicleDashboard = ({ isMockMode = false }: { isMockMode?: boolean }) =>
             {t('hero.title')}
           </h1>
 
-          <p className="mt-5 max-w-3xl text-lg leading-8 text-[#f4efe2]/72">
+          <p className="text-[#f4efe2]/72 mt-5 max-w-3xl text-lg leading-8">
             {t('hero.body')}
           </p>
 
@@ -504,7 +532,9 @@ const ChronicleDashboard = ({ isMockMode = false }: { isMockMode?: boolean }) =>
             <SignalMetric
               icon={<BadgeCheckIcon className="h-4 w-4" />}
               label={t('metrics.claimReady.label')}
-              value={claimableMedals.length > 0 ? `${claimableMedals.length}` : '0'}
+              value={
+                claimableMedals.length > 0 ? `${claimableMedals.length}` : '0'
+              }
               detail={
                 claimableMedals.length > 0
                   ? t('metrics.claimReady.ready')
@@ -534,7 +564,7 @@ const ChronicleDashboard = ({ isMockMode = false }: { isMockMode?: boolean }) =>
           </div>
 
           {claimableMedals.length > 0 ? (
-            <div className="mt-6 border border-[#f0642f]/28 bg-[linear-gradient(135deg,rgba(240,100,47,0.16),rgba(10,10,11,0.92))] px-5 py-4">
+            <div className="border-[#f0642f]/28 mt-6 border bg-[linear-gradient(135deg,rgba(240,100,47,0.16),rgba(10,10,11,0.92))] px-5 py-4">
               <div className="flex flex-wrap items-center justify-between gap-4">
                 <div>
                   <div className="font-mono text-[0.62rem] uppercase tracking-[0.32em] text-[#ffcfbf]">
@@ -555,14 +585,14 @@ const ChronicleDashboard = ({ isMockMode = false }: { isMockMode?: boolean }) =>
             </div>
           ) : null}
 
-          <div className="mt-6 border border-white/10 bg-black/14 px-5 py-5">
-            <div className="font-mono text-[0.62rem] uppercase tracking-[0.32em] text-[#f4efe2]/52">
+          <div className="bg-black/14 mt-6 border border-white/10 px-5 py-5">
+            <div className="text-[#f4efe2]/52 font-mono text-[0.62rem] uppercase tracking-[0.32em]">
               {t('lore.eyebrow')}
             </div>
             <div className="mt-3 text-base font-semibold text-[#f4efe2]">
               {t('lore.title')}
             </div>
-            <p className="mt-3 max-w-3xl text-sm leading-7 text-[#f4efe2]/68">
+            <p className="text-[#f4efe2]/68 mt-3 max-w-3xl text-sm leading-7">
               {t('lore.body')}
             </p>
 
@@ -578,7 +608,7 @@ const ChronicleDashboard = ({ isMockMode = false }: { isMockMode?: boolean }) =>
                     <div className="font-mono text-[0.62rem] uppercase tracking-[0.22em] text-[#f0642f]">
                       {medal.subtitle}
                     </div>
-                    <div className="mt-3 text-sm leading-7 text-[#f4efe2]/72">
+                    <div className="text-[#f4efe2]/72 mt-3 text-sm leading-7">
                       {lore.frontierContext}
                     </div>
                   </div>
@@ -589,7 +619,7 @@ const ChronicleDashboard = ({ isMockMode = false }: { isMockMode?: boolean }) =>
         </div>
 
         <aside className="sds-panel rounded-[2rem] px-6 py-6">
-            <div className="font-mono text-[0.62rem] uppercase tracking-[0.32em] text-[#f0642f]">
+          <div className="font-mono text-[0.62rem] uppercase tracking-[0.32em] text-[#f0642f]">
             {t('manifest.eyebrow')}
           </div>
 
@@ -628,11 +658,14 @@ const ChronicleDashboard = ({ isMockMode = false }: { isMockMode?: boolean }) =>
               label={t('compact.storageAnchors')}
               value={data.metrics.storageUnitAnchors}
             />
-            <CompactMetric label={t('compact.gateJumps')} value={data.metrics.gateJumps} />
+            <CompactMetric
+              label={t('compact.gateJumps')}
+              value={data.metrics.gateJumps}
+            />
           </div>
 
           {isPackageConfigured ? (
-            <div className="mt-6 text-sm text-[#f4efe2]/68">
+            <div className="text-[#f4efe2]/68 mt-6 text-sm">
               <OfficialActionButton
                 className="!text-xs"
                 href={packageUrl(explorerUrl, packageId)}
@@ -664,7 +697,7 @@ const ChronicleDashboard = ({ isMockMode = false }: { isMockMode?: boolean }) =>
               {t('evidence.title')}
             </h2>
           </div>
-          <p className="max-w-xl text-sm leading-7 text-[#f4efe2]/68">
+          <p className="text-[#f4efe2]/68 max-w-xl text-sm leading-7">
             {t('evidence.body')}
           </p>
         </div>
@@ -676,7 +709,9 @@ const ChronicleDashboard = ({ isMockMode = false }: { isMockMode?: boolean }) =>
             label={t('tracks.combat.label')}
             current={data.metrics.killmailAttacks}
             target={5}
-            progressLabel={t('tracks.combat.progress', { current: data.metrics.killmailAttacks })}
+            progressLabel={t('tracks.combat.progress', {
+              current: data.metrics.killmailAttacks,
+            })}
             detail={t('tracks.combat.detail')}
             verifiedLabel={t('tracks.verified')}
             trackingLabel={t('tracks.tracking')}
@@ -700,7 +735,9 @@ const ChronicleDashboard = ({ isMockMode = false }: { isMockMode?: boolean }) =>
             label={t('tracks.transit.label')}
             current={data.metrics.gateJumps}
             target={10}
-            progressLabel={t('tracks.transit.progress', { current: data.metrics.gateJumps })}
+            progressLabel={t('tracks.transit.progress', {
+              current: data.metrics.gateJumps,
+            })}
             detail={t('tracks.transit.detail')}
             verifiedLabel={t('tracks.verified')}
             trackingLabel={t('tracks.tracking')}
@@ -711,14 +748,18 @@ const ChronicleDashboard = ({ isMockMode = false }: { isMockMode?: boolean }) =>
       {medalGroups.map((group) => (
         <section
           key={group.title}
-          id={group.title === t('groups.ready.title') ? 'ready-to-claim' : undefined}
+          id={
+            group.title === t('groups.ready.title')
+              ? 'ready-to-claim'
+              : undefined
+          }
           className="flex flex-col gap-4"
         >
           <div className="flex flex-col gap-2">
             <div className="font-mono text-[0.62rem] uppercase tracking-[0.32em] text-[#f0642f]">
               {group.title}
             </div>
-            <p className="text-sm leading-7 text-[#f4efe2]/68">
+            <p className="text-[#f4efe2]/68 text-sm leading-7">
               {group.description}
             </p>
           </div>
@@ -737,9 +778,7 @@ const ChronicleDashboard = ({ isMockMode = false }: { isMockMode?: boolean }) =>
                     mockTransaction={mockTransactions[medal.slug] ?? null}
                     mockReceipt={mockReceipts[medal.slug] ?? null}
                     onShare={
-                      medal.claimed
-                        ? () => setShareSlug(medal.slug)
-                        : null
+                      medal.claimed ? () => setShareSlug(medal.slug) : null
                     }
                     onAction={() => handleClaim(medal.slug)}
                   />
@@ -747,7 +786,7 @@ const ChronicleDashboard = ({ isMockMode = false }: { isMockMode?: boolean }) =>
               })}
             </div>
           ) : (
-            <div className="border border-white/10 bg-black/14 px-5 py-5 text-sm leading-7 text-[#f4efe2]/66">
+            <div className="bg-black/14 text-[#f4efe2]/66 border border-white/10 px-5 py-5 text-sm leading-7">
               {group.emptyText}
             </div>
           )}
@@ -760,7 +799,7 @@ const ChronicleDashboard = ({ isMockMode = false }: { isMockMode?: boolean }) =>
           walletAddress={currentAccount.address}
           network={network ?? ENetwork.TESTNET}
           isMockMode={isMockMode}
-          mockReceipt={shareSlug ? mockReceipts[shareSlug] ?? null : null}
+          mockReceipt={shareSlug ? (mockReceipts[shareSlug] ?? null) : null}
           onClose={() => setShareSlug(null)}
         />
       ) : null}
@@ -821,17 +860,15 @@ const SignalMetric = ({
   value: string
   detail: string
 }) => (
-  <div className="border border-white/10 bg-black/14 px-4 py-4">
-    <div className="flex items-center gap-2 font-mono text-[0.62rem] uppercase tracking-[0.24em] text-[#f4efe2]/42">
+  <div className="bg-black/14 border border-white/10 px-4 py-4">
+    <div className="text-[#f4efe2]/42 flex items-center gap-2 font-mono text-[0.62rem] uppercase tracking-[0.24em]">
       {icon}
       <span>{label}</span>
     </div>
     <div className="mt-3 text-sm font-medium leading-6 text-[#f4efe2]">
       {value}
     </div>
-    <div className="mt-2 text-sm leading-6 text-[#f4efe2]/62">
-      {detail}
-    </div>
+    <div className="text-[#f4efe2]/62 mt-2 text-sm leading-6">{detail}</div>
   </div>
 )
 
@@ -842,19 +879,17 @@ const ManifestRow = ({
   label: string
   children: ReactNode
 }) => (
-  <div className="border border-white/10 bg-black/14 px-4 py-3">
-    <div className="font-mono text-[0.62rem] uppercase tracking-[0.22em] text-[#f4efe2]/42">
+  <div className="bg-black/14 border border-white/10 px-4 py-3">
+    <div className="text-[#f4efe2]/42 font-mono text-[0.62rem] uppercase tracking-[0.22em]">
       {label}
     </div>
-    <div className="mt-2 text-sm font-medium text-[#f4efe2]">
-      {children}
-    </div>
+    <div className="mt-2 text-sm font-medium text-[#f4efe2]">{children}</div>
   </div>
 )
 
 const CompactMetric = ({ label, value }: { label: string; value: number }) => (
-  <div className="border border-white/10 bg-black/14 px-4 py-3">
-    <div className="font-mono text-[0.62rem] uppercase tracking-[0.22em] text-[#f4efe2]/42">
+  <div className="bg-black/14 border border-white/10 px-4 py-3">
+    <div className="text-[#f4efe2]/42 font-mono text-[0.62rem] uppercase tracking-[0.22em]">
       {label}
     </div>
     <div className="mt-2 font-display text-3xl uppercase tracking-[0.06em] text-[#f4efe2]">
@@ -864,7 +899,7 @@ const CompactMetric = ({ label, value }: { label: string; value: number }) => (
 )
 
 const SystemNotice = ({ children }: { children: ReactNode }) => (
-  <div className="rounded-[1.4rem] border border-[#d9a441]/35 bg-[#2a2112]/72 px-4 py-4 text-sm leading-7 text-[#f9e3b2] shadow-[0_20px_60px_rgba(0,0,0,0.18)]">
+  <div className="bg-[#2a2112]/72 rounded-[1.4rem] border border-[#d9a441]/35 px-4 py-4 text-sm leading-7 text-[#f9e3b2] shadow-[0_20px_60px_rgba(0,0,0,0.18)]">
     <div className="flex items-center gap-2 font-mono text-[0.62rem] uppercase tracking-[0.32em]">
       <Image
         src={AlertAsset}
@@ -930,7 +965,7 @@ const EvidenceTrack = ({
       className={`overflow-hidden border px-5 py-5 shadow-[0_20px_60px_rgba(0,0,0,0.18)] ${toneClassName.shell}`}
     >
       <div className="flex items-center justify-between gap-3">
-        <div className="flex items-center gap-2 font-mono text-[0.62rem] uppercase tracking-[0.24em] text-[#f4efe2]/52">
+        <div className="text-[#f4efe2]/52 flex items-center gap-2 font-mono text-[0.62rem] uppercase tracking-[0.24em]">
           {icon}
           <span>{label}</span>
         </div>
@@ -940,15 +975,15 @@ const EvidenceTrack = ({
       </div>
       <div className="mt-5 font-display text-4xl uppercase tracking-[0.06em] text-[#f4efe2]">
         {current}
-        <span className="ml-2 text-lg text-[#f4efe2]/44">/ {target}</span>
+        <span className="text-[#f4efe2]/44 ml-2 text-lg">/ {target}</span>
       </div>
-      <div className="mt-3 text-sm text-[#f4efe2]/74">
+      <div className="text-[#f4efe2]/74 mt-3 text-sm">
         <EveLinearBar nominator={current} denominator={target} />
       </div>
-      <div className="mt-3 font-mono text-[0.62rem] uppercase tracking-[0.2em] text-[#f4efe2]/44">
+      <div className="text-[#f4efe2]/44 mt-3 font-mono text-[0.62rem] uppercase tracking-[0.2em]">
         {progressLabel} // {progressPercent}%
       </div>
-      <p className="mt-4 text-sm leading-7 text-[#f4efe2]/72">{detail}</p>
+      <p className="text-[#f4efe2]/72 mt-4 text-sm leading-7">{detail}</p>
     </article>
   )
 }
@@ -974,9 +1009,9 @@ const InfrastructureTrack = ({
   storageLabel: string
   detail: string
 }) => (
-  <article className="overflow-hidden border border-[#d9a441]/28 bg-[linear-gradient(180deg,rgba(217,164,65,0.12),rgba(10,10,11,0.96))] px-5 py-5 shadow-[0_20px_60px_rgba(0,0,0,0.18)]">
+  <article className="border-[#d9a441]/28 overflow-hidden border bg-[linear-gradient(180deg,rgba(217,164,65,0.12),rgba(10,10,11,0.96))] px-5 py-5 shadow-[0_20px_60px_rgba(0,0,0,0.18)]">
     <div className="flex items-center justify-between gap-3">
-      <div className="flex items-center gap-2 font-mono text-[0.62rem] uppercase tracking-[0.24em] text-[#f4efe2]/52">
+      <div className="text-[#f4efe2]/52 flex items-center gap-2 font-mono text-[0.62rem] uppercase tracking-[0.24em]">
         <DatabaseIcon className="h-5 w-5" />
         <span>{title}</span>
       </div>
@@ -989,12 +1024,12 @@ const InfrastructureTrack = ({
       <div>
         <div className="font-display text-4xl uppercase tracking-[0.06em] text-[#f4efe2]">
           {networkNodeAnchors}
-          <span className="ml-2 text-lg text-[#f4efe2]/44">/ 1</span>
+          <span className="text-[#f4efe2]/44 ml-2 text-lg">/ 1</span>
         </div>
-        <div className="mt-2 text-sm text-[#f4efe2]/74">
+        <div className="text-[#f4efe2]/74 mt-2 text-sm">
           <EveLinearBar nominator={networkNodeAnchors} denominator={1} />
         </div>
-        <div className="mt-3 font-mono text-[0.62rem] uppercase tracking-[0.2em] text-[#f4efe2]/44">
+        <div className="text-[#f4efe2]/44 mt-3 font-mono text-[0.62rem] uppercase tracking-[0.2em]">
           {nodeLabel}
         </div>
       </div>
@@ -1002,20 +1037,18 @@ const InfrastructureTrack = ({
       <div>
         <div className="font-display text-4xl uppercase tracking-[0.06em] text-[#f4efe2]">
           {storageUnitAnchors}
-          <span className="ml-2 text-lg text-[#f4efe2]/44">/ 3</span>
+          <span className="text-[#f4efe2]/44 ml-2 text-lg">/ 3</span>
         </div>
-        <div className="mt-2 text-sm text-[#f4efe2]/74">
+        <div className="text-[#f4efe2]/74 mt-2 text-sm">
           <EveLinearBar nominator={storageUnitAnchors} denominator={3} />
         </div>
-        <div className="mt-3 font-mono text-[0.62rem] uppercase tracking-[0.2em] text-[#f4efe2]/44">
+        <div className="text-[#f4efe2]/44 mt-3 font-mono text-[0.62rem] uppercase tracking-[0.2em]">
           {storageLabel}
         </div>
       </div>
     </div>
 
-    <p className="mt-4 text-sm leading-7 text-[#f4efe2]/72">
-      {detail}
-    </p>
+    <p className="text-[#f4efe2]/72 mt-4 text-sm leading-7">{detail}</p>
   </article>
 )
 

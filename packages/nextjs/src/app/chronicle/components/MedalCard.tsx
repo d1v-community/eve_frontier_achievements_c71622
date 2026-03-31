@@ -3,6 +3,7 @@
 import EveButton from '@eveworld/ui-components/components/EveButton'
 import EveLinearBar from '@eveworld/ui-components/components/EveLinearBar'
 import { useLocale, useTranslations } from 'next-intl'
+import { getInsufficientEvidenceLabel } from '~~/chronicle/config/businessCopy'
 import type { ChronicleMedalState } from '~~/chronicle/types'
 import { getMedalLoreBySlug } from '../config/medalLore'
 import type { MockMedalTxReceipt } from '../mock/mockTransaction'
@@ -69,6 +70,8 @@ const MedalCard = ({
   const definition = getMedalDefinitionByKind(medal.kind)
   const tone = definition ? TONE_STYLES[definition.tone] : TONE_STYLES.azure
   const lore = getMedalLoreBySlug(medal.slug, locale)
+  const hasSecondaryTitle = medal.title !== medal.subtitle
+  const emptyEvidenceLabel = getInsufficientEvidenceLabel(locale)
 
   const status = medal.claimed
     ? t('status.bound')
@@ -94,11 +97,13 @@ const MedalCard = ({
     >
       <div className="flex items-start justify-between gap-4">
         <div>
-          <div className="text-white/48 font-mono text-[0.62rem] uppercase tracking-[0.32em]">
-            {medal.subtitle}
-          </div>
+          {hasSecondaryTitle ? (
+            <div className="text-white/48 font-mono text-[0.62rem] uppercase tracking-[0.32em]">
+              {medal.subtitle}
+            </div>
+          ) : null}
           <h3 className="mt-3 font-display text-3xl uppercase leading-none tracking-[0.08em]">
-            {medal.title}
+            {hasSecondaryTitle ? medal.title : medal.subtitle}
           </h3>
         </div>
         <div className="flex flex-col items-end gap-2">
@@ -117,7 +122,7 @@ const MedalCard = ({
 
       <div className="bg-black/14 text-white/74 mt-6 border border-white/10 px-4 py-4 text-sm leading-7">
         <div className="text-white/42 font-mono text-[0.62rem] uppercase tracking-[0.28em]">
-          threshold
+          {t('sections.threshold')}
         </div>
         <div className="mt-3">{medal.requirement}</div>
       </div>
@@ -145,10 +150,10 @@ const MedalCard = ({
 
       <div className="bg-black/14 text-white/74 mt-5 border border-white/10 px-4 py-4 text-sm leading-7">
         <div className="text-white/42 font-mono text-[0.62rem] uppercase tracking-[0.28em]">
-          indexed evidence
+          {t('sections.indexedEvidence')}
         </div>
         <div className={`mt-3 text-sm leading-7 ${tone.accent}`}>
-          {medal.proof || '系统还没有抓到足够的 Frontier 行为证据。'}
+          {medal.proof || emptyEvidenceLabel}
         </div>
       </div>
 
@@ -181,7 +186,7 @@ const MedalCard = ({
               <button
                 type="button"
                 onClick={() => onShare()}
-                className="border border-white/12 bg-white/6 px-4 py-3 text-left font-mono text-[0.68rem] uppercase tracking-[0.22em] text-white/78 transition-transform hover:-translate-y-0.5 hover:bg-white/10"
+                className="border-white/12 bg-white/6 text-white/78 border px-4 py-3 text-left font-mono text-[0.68rem] uppercase tracking-[0.22em] transition-transform hover:-translate-y-0.5 hover:bg-white/10"
               >
                 {t('actions.shareCard')}
               </button>

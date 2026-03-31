@@ -37,7 +37,10 @@ export default function MedalPageClient({
   const locale = useLocale()
   const t = useTranslations('medalPage')
   const homeHref = withLocale(locale, '/')
-  const warriorHref = withLocale(locale, `/warrior/${walletAddress}?network=${network}`)
+  const warriorHref = withLocale(
+    locale,
+    `/warrior/${walletAddress}?network=${network}`
+  )
   const lore = getMedalLoreBySlug(medal.slug, locale)
 
   return (
@@ -72,9 +75,11 @@ export default function MedalPageClient({
                 <h1 className="mt-4 font-display text-4xl uppercase tracking-[0.08em] text-[#f4efe2] sm:text-5xl">
                   {definition.subtitle}
                 </h1>
-                <p className="mt-2 text-lg tracking-[0.16em] text-white/66">
-                  {definition.title}
-                </p>
+                {definition.title !== definition.subtitle ? (
+                  <p className="text-white/66 mt-2 text-lg tracking-[0.16em]">
+                    {definition.title}
+                  </p>
+                ) : null}
                 <p className="mt-5 max-w-2xl text-base leading-8 text-white/70">
                   {status.summary} {t('summarySuffix')}
                 </p>
@@ -96,7 +101,10 @@ export default function MedalPageClient({
               {[
                 [t('stats.wallet'), snapshot.profile.walletAddress],
                 [t('stats.network'), network.toUpperCase()],
-                [t('stats.character'), snapshot.profile.characterId || t('stats.unavailable')],
+                [
+                  t('stats.character'),
+                  snapshot.profile.characterId || t('stats.unavailable'),
+                ],
               ].map(([label, value]) => (
                 <div
                   key={label}
@@ -119,36 +127,40 @@ export default function MedalPageClient({
 
           <section className="grid gap-6 lg:grid-cols-[1.05fr_0.95fr]">
             <article className="sds-panel rounded-[1.8rem] border px-6 py-6">
-              <div className="font-mono text-[0.62rem] uppercase tracking-[0.28em] text-white/42">
+              <div className="text-white/42 font-mono text-[0.62rem] uppercase tracking-[0.28em]">
                 {t('evidenceTitle')}
               </div>
-              <div className="mt-4 text-base leading-8 text-[#f4efe2]/76">
+              <div className="text-[#f4efe2]/76 mt-4 text-base leading-8">
                 {medal.proof || t('evidenceFallback')}
               </div>
 
-              <div className="mt-8 font-mono text-[0.62rem] uppercase tracking-[0.28em] text-white/42">
+              <div className="text-white/42 mt-8 font-mono text-[0.62rem] uppercase tracking-[0.28em]">
                 {t('requirementTitle')}
               </div>
-              <div className="mt-4 text-base leading-8 text-[#f4efe2]/76">
+              <div className="text-[#f4efe2]/76 mt-4 text-base leading-8">
                 {definition.requirement}
               </div>
 
-              <div className="mt-8 font-mono text-[0.62rem] uppercase tracking-[0.28em] text-white/42">
+              <div className="text-white/42 mt-8 font-mono text-[0.62rem] uppercase tracking-[0.28em]">
                 {t('contextTitle')}
               </div>
-              <div className="mt-4 text-base leading-8 text-[#f4efe2]/76">
+              <div className="text-[#f4efe2]/76 mt-4 text-base leading-8">
                 {lore.frontierContext}
               </div>
             </article>
 
             <article className="sds-panel rounded-[1.8rem] border px-6 py-6">
-              <div className="font-mono text-[0.62rem] uppercase tracking-[0.28em] text-white/42">
+              <div className="text-white/42 font-mono text-[0.62rem] uppercase tracking-[0.28em]">
                 {t('stateTitle')}
               </div>
               <div className="mt-4 flex flex-wrap gap-3">
                 {[
                   t('chips.rarity', { rarity: definition.rarity }),
-                  medal.claimed ? t('chips.bound') : medal.unlocked ? t('chips.verified') : t('chips.locked'),
+                  medal.claimed
+                    ? t('chips.bound')
+                    : medal.unlocked
+                      ? t('chips.verified')
+                      : t('chips.locked'),
                   `${medal.progressCurrent} / ${medal.progressTarget}`,
                 ].map((label) => (
                   <span
@@ -165,17 +177,18 @@ export default function MedalPageClient({
                 ))}
               </div>
 
-              <div className="mt-8 text-sm leading-7 text-white/62">
+              <div className="text-white/62 mt-8 text-sm leading-7">
                 {t('liveNote')}
               </div>
 
-              <div className="mt-8 rounded-2xl border px-4 py-4 text-sm leading-7 text-[#f4efe2]/72"
+              <div
+                className="text-[#f4efe2]/72 mt-8 rounded-2xl border px-4 py-4 text-sm leading-7"
                 style={{
                   background: 'rgba(255,255,255,0.03)',
                   borderColor: 'rgba(255,255,255,0.08)',
                 }}
               >
-                <div className="font-mono text-[0.62rem] uppercase tracking-[0.26em] text-white/42">
+                <div className="text-white/42 font-mono text-[0.62rem] uppercase tracking-[0.26em]">
                   {t('whyTitle')}
                 </div>
                 <div className="mt-3">{lore.whyItMatters}</div>

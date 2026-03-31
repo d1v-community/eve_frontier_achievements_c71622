@@ -5,73 +5,58 @@
  * `localClaimedSlugs` is maintained by the dashboard to simulate sequential claims.
  */
 import type { ENetwork } from '~~/types/ENetwork'
-import { MEDAL_CATALOG } from '../config/medals'
+import {
+  buildStandardProgressLabel,
+  buildVoidPioneerProgressLabel,
+  getMockModeWarning,
+  resolveChronicleBusinessLocale,
+} from '~~/chronicle/config/businessCopy'
+import { getLocalizedMedalCatalog, resolveMedalLocale } from '../config/medals'
 import { computeWarriorScore } from '../helpers/score'
-import type {
-  ChronicleClaimTicket,
-  ChronicleMedalState,
-  ChronicleSnapshot,
-} from '../types'
-
-// ─── Static fake claim ticket ─────────────────────────────────────────────────
-// Won't be submitted to chain – only used to satisfy the claimTicket guard in
-// the dashboard so the Claim button renders properly.
-const MOCK_CLAIM_TICKET: ChronicleClaimTicket = {
-  templateObjectId: '0x' + '1'.repeat(63),
-  templateVersion: 1,
-  proofDigestBase64: 'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=',
-  evidenceUri: 'https://mock.frontier.chronicle/evidence/demo',
-  issuedAtMs: String(Date.now()),
-  deadlineMs: String(Date.now() + 24 * 60 * 60 * 1000),
-  nonceBase64: 'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=',
-  signerPublicKeyBase64: 'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=',
-  signatureBase64: 'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=',
-}
+import {
+  createMockClaimTicket,
+  createMockMedalProof,
+  createMockProfileArtifacts,
+  createMockTemplateObjectId,
+} from './mockArtifacts'
+import type { ChronicleMedalState, ChronicleSnapshot } from '../types'
 
 // ─── Per-medal progress in mock mode ─────────────────────────────────────────
 const MOCK_PROGRESS: Record<
   string,
-  { current: number; target: number; label: string }
+  { current: number; target: number }
 > = {
   'bloodlust-butcher': {
     current: 7,
     target: 5,
-    label: '7 / 5 confirmed attacker records',
   },
   'void-pioneer': {
     current: 1,
     target: 1,
-    label: '1 / 1 network node anchored',
   },
   'galactic-courier': {
     current: 14,
     target: 10,
-    label: '14 / 10 verified gate jumps',
   },
   'turret-sentry': {
     current: 4,
     target: 3,
-    label: '4 / 3 turret operations',
   },
   'assembly-pioneer': {
     current: 1,
     target: 3,
-    label: '1 / 3 smart assembly interactions',
   },
   'turret-anchor': {
     current: 1,
     target: 3,
-    label: '1 / 3 turret anchors deployed',
   },
   'ssu-trader': {
     current: 2,
     target: 5,
-    label: '2 / 5 SSU trade operations',
   },
   'fuel-feeder': {
     current: 1,
     target: 5,
-    label: '1 / 5 network node fuels',
   },
 }
 
@@ -95,20 +80,51 @@ const BASE_MINTABLE = new Set(['galactic-courier'])
 export function buildMockSnapshot(
   walletAddress: string,
   network: ENetwork,
-  localClaimedSlugs: Set<string>
+  localClaimedSlugs: Set<string>,
+  locale?: string
 ): ChronicleSnapshot {
-  const medals: ChronicleMedalState[] = MEDAL_CATALOG.map((def) => {
+  const resolvedLocale = resolveMedalLocale(locale)
+  const businessLocale = resolveChronicleBusinessLocale(locale)
+  const medalCatalog = getLocalizedMedalCatalog(resolvedLocale)
+  const profileArtifacts = createMockProfileArtifacts({
+    walletAddress,
+    network,
+  })
+  const issuedAtBase = Date.now() - 2 * 60 * 1000
+  const medals: ChronicleMedalState[] = medalCatalog.map((def) => {
     const isClaimed =
       BASE_CLAIMED.has(def.slug) || localClaimedSlugs.has(def.slug)
     const isMintable = BASE_MINTABLE.has(def.slug) && !isClaimed
     const isClaimable = BASE_CLAIMABLE.has(def.slug) && !isClaimed
     const isUnlocked = isClaimed || isClaimable || isMintable
     const progress = MOCK_PROGRESS[def.slug]
-    const title = def.slug === 'galactic-courier' ? '星门拓荒者' : def.title
+    const title =
+      def.slug === 'galactic-courier' && resolvedLocale === 'zh-CN'
+        ? '星门拓荒者'
+        : def.title
     const teaser =
-      def.slug === 'galactic-courier'
+      def.slug === 'galactic-courier' && resolvedLocale === 'zh-CN'
         ? '你穿过的每一道星门，都会在演示里变成一枚可以当场铸造、当场炫耀的勋章。'
-        : def.teaser
+        : def.slug === 'galactic-courier'
+          ? 'Every gate you cross in the demo becomes a medal you can mint and show on the spot.'
+          : def.teaser
+    const templateObjectId = isUnlocked
+      ? createMockTemplateObjectId({
+          walletAddress,
+          network,
+          slug: def.slug,
+        })
+      : null
+    const claimTicket =
+      isClaimable && templateObjectId
+        ? createMockClaimTicket({
+            walletAddress,
+            network,
+            definition: def,
+            templateObjectId,
+            issuedAtMs: issuedAtBase + def.kind * 7_500,
+          })
+        : null
 
     return {
       kind: def.kind,
@@ -127,10 +143,32 @@ export function buildMockSnapshot(
         100,
         Math.round((progress.current / progress.target) * 100)
       ),
-      progressLabel: progress.label,
-      proof: isClaimed ? `0x${'a'.repeat(62)}${def.kind.toString().padStart(2, '0')}` : null,
-      templateObjectId: isUnlocked ? `0x${String(def.kind).repeat(64).slice(0, 64)}` : null,
-      claimTicket: isClaimable ? MOCK_CLAIM_TICKET : null,
+      progressLabel:
+        def.slug === 'void-pioneer'
+          ? buildVoidPioneerProgressLabel({
+              networkNodeAnchors: 1,
+              storageUnitAnchors: 1,
+              locale: businessLocale,
+            })
+          : buildStandardProgressLabel({
+              slug: def.slug,
+              current: progress.current,
+              target: progress.target,
+              locale: businessLocale,
+            }),
+      proof: isUnlocked
+        ? createMockMedalProof({
+            walletAddress,
+            network,
+            definition: def,
+            current: progress.current,
+            target: progress.target,
+            claimed: isClaimed,
+            locale: businessLocale,
+          })
+        : null,
+      templateObjectId,
+      claimTicket,
     }
   })
 
@@ -140,15 +178,15 @@ export function buildMockSnapshot(
     profile: {
       walletAddress,
       requestedNetwork: network,
-      observedNetwork: 'frontier-testnet',
-      evePackageId: '0x' + 'e'.repeat(63),
-      characterId: '0x' + 'c'.repeat(63),
+      observedNetwork: `frontier-${network}`,
+      evePackageId: profileArtifacts.evePackageId,
+      characterId: profileArtifacts.characterId,
       lastActivityAt: new Date(Date.now() - 3 * 60 * 60 * 1000).toISOString(),
       scanMode: 'authenticated',
       scanLimitReached: false,
       scannedPages: 12,
       contractConfigured: true,
-      registryObjectId: '0x' + 'b'.repeat(63),
+      registryObjectId: profileArtifacts.registryObjectId,
     },
     metrics: {
       killmailAttacks: 7,
@@ -162,7 +200,7 @@ export function buildMockSnapshot(
       networkNodeFuels: 1,
     },
     medals,
-    warnings: ['[MOCK MODE] 当前数据为模拟演示，不涉及任何真实链上交易。'],
+    warnings: [getMockModeWarning(businessLocale)],
     warriorScore,
   }
 }

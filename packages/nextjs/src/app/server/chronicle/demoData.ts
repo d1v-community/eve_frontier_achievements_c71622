@@ -1,7 +1,33 @@
 import { getMedalDefinitionByKind } from '~~/chronicle/config/medals'
+import {
+  buildDemoProof,
+  buildStandardProgressLabel,
+  buildVoidPioneerProgressLabel,
+  getDemoModeWarning,
+} from '~~/chronicle/config/businessCopy'
 import { computeWarriorScore } from '~~/chronicle/helpers/score'
 import type { ChronicleMedalState, ChronicleSnapshot } from '~~/chronicle/types'
 import { ENetwork } from '~~/types/ENetwork'
+
+const DEMO_METRICS = {
+  killmailAttacks: 7,
+  networkNodeAnchors: 1,
+  storageUnitAnchors: 1,
+  gateJumps: 15,
+  turretOps: 0,
+  assemblyOps: 0,
+  turretAnchors: 0,
+  ssuTradeOps: 0,
+  networkNodeFuels: 0,
+} as const
+
+const clampPercent = (current: number, target: number) => {
+  if (target <= 0) {
+    return 0
+  }
+
+  return Math.max(0, Math.min(100, Math.round((current / target) * 100)))
+}
 
 const buildDemoMedal = ({
   kind,
@@ -11,6 +37,8 @@ const buildDemoMedal = ({
   progressCurrent,
   progressTarget,
   proof,
+  locale,
+  voidPioneerCounts,
 }: {
   kind: 1 | 2 | 3
   unlocked: boolean
@@ -19,8 +47,13 @@ const buildDemoMedal = ({
   progressCurrent: number
   progressTarget: number
   proof: string
+  locale?: string
+  voidPioneerCounts?: {
+    networkNodeAnchors: number
+    storageUnitAnchors: number
+  }
 }): ChronicleMedalState => {
-  const definition = getMedalDefinitionByKind(kind)
+  const definition = getMedalDefinitionByKind(kind, locale)
 
   if (!definition) {
     throw new Error(`Missing medal definition for demo kind ${kind}`)
@@ -39,20 +72,30 @@ const buildDemoMedal = ({
     claimable,
     progressCurrent,
     progressTarget,
-    progressPercent: Math.round((progressCurrent / progressTarget) * 100),
-    progressLabel: `${progressCurrent} / ${progressTarget}`,
+    progressPercent: clampPercent(progressCurrent, progressTarget),
+    progressLabel:
+      definition.slug === 'void-pioneer'
+        ? buildVoidPioneerProgressLabel({
+            networkNodeAnchors: voidPioneerCounts?.networkNodeAnchors ?? 0,
+            storageUnitAnchors: voidPioneerCounts?.storageUnitAnchors ?? 0,
+            locale,
+          })
+        : buildStandardProgressLabel({
+            slug: definition.slug,
+            current: progressCurrent,
+            target: progressTarget,
+            locale,
+          }),
     proof,
     templateObjectId: null,
     claimTicket: null,
   }
 }
 
-/**
- * 生成 Demo 模式的模拟数据，用于 Demo Day 演示
- */
 export function generateDemoSnapshot(
   walletAddress: string,
-  network: ENetwork
+  network: ENetwork,
+  locale?: string
 ): ChronicleSnapshot {
   const medals = [
     buildDemoMedal({
@@ -62,7 +105,8 @@ export function generateDemoSnapshot(
       claimable: false,
       progressCurrent: 15,
       progressTarget: 10,
-      proof: '15 gate::jump events indexed by Chronicle',
+      proof: buildDemoProof({ kind: 3, locale }) || '',
+      locale,
     }),
     buildDemoMedal({
       kind: 1,
@@ -71,7 +115,8 @@ export function generateDemoSnapshot(
       claimable: true,
       progressCurrent: 7,
       progressTarget: 5,
-      proof: '7 confirmed attacker records in killmail data',
+      proof: buildDemoProof({ kind: 1, locale }) || '',
+      locale,
     }),
     buildDemoMedal({
       kind: 2,
@@ -80,7 +125,12 @@ export function generateDemoSnapshot(
       claimable: true,
       progressCurrent: 2,
       progressTarget: 1,
-      proof: '2 anchor events (network_node or storage_unit)',
+      proof: buildDemoProof({ kind: 2, locale }) || '',
+      locale,
+      voidPioneerCounts: {
+        networkNodeAnchors: DEMO_METRICS.networkNodeAnchors,
+        storageUnitAnchors: DEMO_METRICS.storageUnitAnchors,
+      },
     }),
   ]
 
@@ -98,21 +148,9 @@ export function generateDemoSnapshot(
       contractConfigured: false,
       registryObjectId: null,
     },
-    metrics: {
-      killmailAttacks: 7,
-      networkNodeAnchors: 1,
-      storageUnitAnchors: 1,
-      gateJumps: 15,
-      turretOps: 0,
-      assemblyOps: 0,
-      turretAnchors: 0,
-      ssuTradeOps: 0,
-      networkNodeFuels: 0,
-    },
+    metrics: DEMO_METRICS,
     medals,
-    warnings: [
-      '⚠️ DEMO MODE: This is simulated data for demonstration purposes',
-    ],
+    warnings: [getDemoModeWarning(locale)],
     warriorScore: computeWarriorScore(medals),
   }
 }

@@ -29,14 +29,17 @@ export async function generateMetadata({
   const locale = await getLocale()
   const t = await getTranslations({ locale, namespace: 'medalPage.meta' })
   const { walletAddress, slug } = await params
-  const { network: rawNetwork, m: rawMock, claimed: rawClaimed } =
-    await searchParams
+  const {
+    network: rawNetwork,
+    m: rawMock,
+    claimed: rawClaimed,
+  } = await searchParams
 
   if (!isValidSuiAddress(walletAddress)) {
     return { title: t('notFound') }
   }
 
-  const definition = getMedalDefinitionBySlug(slug)
+  const definition = getMedalDefinitionBySlug(slug, locale)
 
   if (!definition) {
     return { title: t('notFound') }
@@ -48,9 +51,10 @@ export async function generateMetadata({
       ? getMockRouteSnapshot(
           walletAddress,
           network,
-          resolveMockClaimedSlugs(rawClaimed)
+          resolveMockClaimedSlugs(rawClaimed),
+          locale
         )
-      : await getChronicleSnapshot(walletAddress, network)
+      : await getChronicleSnapshot(walletAddress, network, locale)
     return buildMedalPageMetadata({
       snapshot,
       walletAddress,
@@ -63,18 +67,24 @@ export async function generateMetadata({
   }
 }
 
-export default async function MedalSharePage({ params, searchParams }: PageProps) {
+export default async function MedalSharePage({
+  params,
+  searchParams,
+}: PageProps) {
   const locale = await getLocale()
   const t = await getTranslations({ locale, namespace: 'medalPage.status' })
   const { walletAddress, slug } = await params
-  const { network: rawNetwork, m: rawMock, claimed: rawClaimed } =
-    await searchParams
+  const {
+    network: rawNetwork,
+    m: rawMock,
+    claimed: rawClaimed,
+  } = await searchParams
 
   if (!isValidSuiAddress(walletAddress)) {
     notFound()
   }
 
-  const definition = getMedalDefinitionBySlug(slug)
+  const definition = getMedalDefinitionBySlug(slug, locale)
 
   if (!definition) {
     notFound()
@@ -88,9 +98,10 @@ export default async function MedalSharePage({ params, searchParams }: PageProps
       ? getMockRouteSnapshot(
           walletAddress,
           network,
-          resolveMockClaimedSlugs(rawClaimed)
+          resolveMockClaimedSlugs(rawClaimed),
+          locale
         )
-      : await getChronicleSnapshot(walletAddress, network)
+      : await getChronicleSnapshot(walletAddress, network, locale)
   } catch {
     notFound()
   }

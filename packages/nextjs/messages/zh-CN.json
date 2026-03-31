@@ -98,17 +98,17 @@
       "courierTitle": "Galactic Courier",
       "courierMetric": "10 次跃迁",
       "courierDetail": "持续移动会变成明确的物流行为，而不只是另一张截图。",
-      "courierSource": "`gate::jump` 轨迹会映射成 courier 阈值。",
+      "courierSource": "星门跃迁轨迹会映射成物流勋章门槛。",
       "pioneerSubtitle": "Structure Footprint",
       "pioneerTitle": "Void Pioneer",
       "pioneerMetric": "1 / 3 次锚定",
-      "pioneerDetail": "锚定 network node 或 storage unit，才说明玩家真的在边境留下了基础设施。",
-      "pioneerSource": "`network_node::anchor` 和 `storage_unit::anchor` 会输入 builder 轨迹。",
+      "pioneerDetail": "只有锚定网络节点或储存单元，才说明玩家真的在边境留下了基础设施。",
+      "pioneerSource": "网络节点锚定和储存单元锚定都会输入建设轨迹。",
       "bloodlustSubtitle": "Combat Trace",
       "bloodlustTitle": "Bloodlust Butcher",
-      "bloodlustMetric": "5 次确认 attacker",
-      "bloodlustDetail": "只有被 killmail 确认的 attacker 记录，才会推进战斗勋章准备状态。",
-      "bloodlustSource": "Confirmed attacker records drive combat medal readiness.",
+      "bloodlustMetric": "5 次已确认攻击者",
+      "bloodlustDetail": "只有被击杀记录确认的攻击者事件，才会推进战斗勋章准备状态。",
+      "bloodlustSource": "只有已确认的攻击者事件会推进战斗勋章准备状态。",
       "proofSource": "证据来源"
     },
     "trust": {
@@ -424,7 +424,7 @@
         "detail": "{medalTitle} 已写入 soulbound medal object，并绑定到目标钱包。"
       },
       "claimTicketConsumed": {
-        "label": "Claim ticket 已消耗",
+        "label": "领取凭证已消耗",
         "detail": "这张 mock claim ticket 已标记为已使用，避免同一份 claim 被重复执行。"
       }
     },
@@ -733,7 +733,7 @@
       "gateJumps": "星门跃迁"
     },
     "evidence": {
-      "eyebrow": "indexed evidence",
+      "eyebrow": "已索引证据",
       "title": "先展示行为证据，再展示勋章状态。",
       "body": "玩家先看懂系统到底抓到了哪些 Frontier 轨迹，再决定要不要继续冲门槛，逻辑才顺。"
     },
@@ -742,14 +742,14 @@
       "tracking": "追踪中",
       "combat": {
         "label": "战斗轨迹",
-        "progress": "{current} / 5 条已确认 attacker 记录",
-        "detail": "击杀成就只认被索引器确认的 killmail attacker。"
+        "progress": "{current} / 5 条已确认攻击者事件",
+        "detail": "击杀类勋章只认被索引器确认的击杀记录攻击者事件。"
       },
       "infrastructure": {
         "label": "建设轨迹",
-        "nodeLabel": "network node anchors",
-        "storageLabel": "storage unit anchors",
-        "detail": "建设类勋章按“1 个 network node 或 3 个 storage unit”判定，满足任一条都算成立。"
+        "nodeLabel": "网络节点锚定",
+        "storageLabel": "储存单元锚定",
+        "detail": "建设类勋章按“1 个网络节点或 3 个储存单元”判定，满足任一条都算成立。"
       },
       "transit": {
         "label": "航线账本",
@@ -759,6 +759,8 @@
     },
     "card": {
       "sections": {
+        "threshold": "达成门槛",
+        "indexedEvidence": "已索引证据",
         "whyItMatters": "为什么这件事重要"
       },
       "status": {

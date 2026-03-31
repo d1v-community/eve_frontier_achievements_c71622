@@ -1,5 +1,12 @@
 import { computeWarriorScore } from '~~/chronicle/helpers/score'
-import type { ChronicleClaimTicket, ChronicleSnapshot } from '~~/chronicle/types'
+import {
+  buildChronicleActivityWarning,
+  buildClaimTicketFailureWarning,
+} from '~~/chronicle/config/businessCopy'
+import type {
+  ChronicleClaimTicket,
+  ChronicleSnapshot,
+} from '~~/chronicle/types'
 import {
   type ActiveMedalTemplate,
   buildClaimTickets,
@@ -17,7 +24,8 @@ import { ENetwork } from '~~/types/ENetwork'
 
 export const getChronicleSnapshot = async (
   walletAddress: string,
-  network: ENetwork = ENetwork.TESTNET
+  network: ENetwork = ENetwork.TESTNET,
+  locale?: string
 ): Promise<ChronicleSnapshot> => {
   const contractPackageId = resolveContractPackageId(network)
   const contractConfigured = isContractConfigured(contractPackageId)
@@ -42,21 +50,24 @@ export const getChronicleSnapshot = async (
     activitySnapshot.counts,
     claimedSlugs,
     {},
-    activeTemplates
+    activeTemplates,
+    locale
   )
   let claimTicketsByKind: Partial<Record<number, ChronicleClaimTicket>> = {}
   const warnings = buildChronicleWarnings(
     activitySnapshot.scanLimitReached
-      ? activitySnapshot.scanMode === 'authenticated'
-        ? 'Eve Eyes scan hit the configured page cap. Counts may be partial.'
-        : 'Eve Eyes preview mode only scans the first few pages. Set EVE_EYES_API_KEY for deeper history.'
+      ? buildChronicleActivityWarning({
+          scanMode: activitySnapshot.scanMode,
+          locale,
+        })
       : null,
     {
       contractConfigured,
       registryObjectId,
       claimSigningConfigured,
       activeTemplates,
-    }
+    },
+    locale
   )
 
   if (contractConfigured && registryObjectId && claimSigningConfigured) {
@@ -70,9 +81,10 @@ export const getChronicleSnapshot = async (
       )
     } catch (error) {
       warnings.push(
-        error instanceof Error
-          ? `Claim ticket generation failed: ${error.message}`
-          : 'Claim ticket generation failed.'
+        buildClaimTicketFailureWarning({
+          message: error instanceof Error ? error.message : undefined,
+          locale,
+        })
       )
     }
   }
@@ -81,7 +93,8 @@ export const getChronicleSnapshot = async (
     activitySnapshot.counts,
     claimedSlugs,
     claimTicketsByKind,
-    activeTemplates
+    activeTemplates,
+    locale
   )
 
   return {

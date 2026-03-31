@@ -6,11 +6,12 @@ import type { ENetwork } from '~~/types/ENetwork'
 export const getMockRouteSnapshot = (
   walletAddress: string,
   network: ENetwork,
-  claimedSlugs: string[]
+  claimedSlugs: string[],
+  locale?: string
 ): ChronicleSnapshot => {
   const localClaimedSlugs = new Set(
     claimedSlugs.filter((slug): slug is MedalSlug => slug.length > 0)
   )
 
-  return buildMockSnapshot(walletAddress, network, localClaimedSlugs)
+  return buildMockSnapshot(walletAddress, network, localClaimedSlugs, locale)
 }

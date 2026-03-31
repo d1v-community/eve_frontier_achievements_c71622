@@ -26,8 +26,11 @@ export async function generateMetadata({
   const locale = await getLocale()
   const t = await getTranslations({ locale, namespace: 'warriorPage' })
   const { walletAddress } = await params
-  const { network: rawNetwork, m: rawMock, claimed: rawClaimed } =
-    await searchParams
+  const {
+    network: rawNetwork,
+    m: rawMock,
+    claimed: rawClaimed,
+  } = await searchParams
 
   if (!isValidSuiAddress(walletAddress)) {
     return { title: t('meta.notFound') }
@@ -39,10 +42,16 @@ export async function generateMetadata({
       ? getMockRouteSnapshot(
           walletAddress,
           network,
-          resolveMockClaimedSlugs(rawClaimed)
+          resolveMockClaimedSlugs(rawClaimed),
+          locale
         )
-      : await getChronicleSnapshot(walletAddress, network)
-    return buildWarriorPageMetadata({ snapshot, walletAddress, network, locale })
+      : await getChronicleSnapshot(walletAddress, network, locale)
+    return buildWarriorPageMetadata({
+      snapshot,
+      walletAddress,
+      network,
+      locale,
+    })
   } catch {
     return { title: t('meta.fallback') }
   }
@@ -52,8 +61,11 @@ export default async function WarriorPage({ params, searchParams }: PageProps) {
   const locale = await getLocale()
   const t = await getTranslations({ locale, namespace: 'warriorPage' })
   const { walletAddress } = await params
-  const { network: rawNetwork, m: rawMock, claimed: rawClaimed } =
-    await searchParams
+  const {
+    network: rawNetwork,
+    m: rawMock,
+    claimed: rawClaimed,
+  } = await searchParams
 
   if (!isValidSuiAddress(walletAddress)) {
     notFound()
@@ -67,9 +79,10 @@ export default async function WarriorPage({ params, searchParams }: PageProps) {
       ? getMockRouteSnapshot(
           walletAddress,
           network,
-          resolveMockClaimedSlugs(rawClaimed)
+          resolveMockClaimedSlugs(rawClaimed),
+          locale
         )
-      : await getChronicleSnapshot(walletAddress, network)
+      : await getChronicleSnapshot(walletAddress, network, locale)
   } catch {
     notFound()
   }

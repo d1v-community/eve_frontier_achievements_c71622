@@ -96,19 +96,19 @@
       "objectiveBody": "Leikmaður ætti að geta svarað þremur spurningum á innan við mínútu: hvað var þekkt, hversu langt er í mark og af hverju claim er eða er ekki tiltækt.",
       "courierSubtitle": "Transit Ledger",
       "courierTitle": "Galactic Courier",
-      "courierMetric": "10 gate jumps",
+      "courierMetric": "10 stjörnuhliðarstökk",
       "courierDetail": "Stöðug hreyfing verður sýnileg flutningaslóð í stað enn einnar skjámyndar.",
-      "courierSource": "`gate::jump` slóðir mynda courier viðmiðið.",
+      "courierSource": "Stjörnuhliðarstökk mynda flutningaviðmiðið.",
       "pioneerSubtitle": "Structure Footprint",
       "pioneerTitle": "Void Pioneer",
-      "pioneerMetric": "1 / 3 anchors",
-      "pioneerDetail": "Að akkerisfesta network node eða storage unit sýnir að leikmaður skildi raunverulega eftir innviði.",
-      "pioneerSource": "`network_node::anchor` og `storage_unit::anchor` fæða builder slóðina.",
+      "pioneerMetric": "1 / 3 festingar",
+      "pioneerDetail": "Að festa nethnút eða geymslueiningu sýnir að leikmaður skildi raunverulega eftir innviði.",
+      "pioneerSource": "Festingar nethnúta og geymslueininga fæða uppbyggingarslóðina.",
       "bloodlustSubtitle": "Combat Trace",
       "bloodlustTitle": "Bloodlust Butcher",
-      "bloodlustMetric": "5 staðfestir attackers",
-      "bloodlustDetail": "Aðeins staðfestar killmail attacker skrár færa bardagamedalíu áfram.",
-      "bloodlustSource": "Confirmed attacker records drive combat medal readiness.",
+      "bloodlustMetric": "5 staðfestir árásaratburðir",
+      "bloodlustDetail": "Aðeins staðfestir árásaratburðir úr killmail færa bardagamedalíu áfram.",
+      "bloodlustSource": "Aðeins staðfestir árásaratburðir færa bardagamedalíu nær viðmiðinu.",
       "proofSource": "proof source"
     },
     "trust": {
@@ -240,7 +240,7 @@
   "warriorShareDialog": {
     "closeAria": "Loka Warrior deilingarglugga",
     "close": "Loka",
-    "eyebrow": "warrior social capsule",
+    "eyebrow": "Warrior deilingarhylki",
     "body": "Þetta prófílspjald ber með sér Warrior samantektina, medalíuhápunkta og QR kóða sem sendir áhorfendur beint aftur á lifandi Warrior síðuna.",
     "previewFormat": "forskoðunarsnið",
     "variants": {
@@ -281,247 +281,247 @@
     },
     "action": {
       "tapToShare": "Smelltu til að deila",
-      "tapToMint": "Smelltu til að mynda",
-      "noShare": "Engin deiling"
+      "tapToMint": "Smelltu til að minta",
+      "noShare": "Deiling ekki tiltæk"
     }
   },
   "mockFlow": {
     "actions": {
-      "mint": "Mint Medal",
-      "claim": "Claim Medal"
+      "mint": "Minta medalíu",
+      "claim": "Innlýsa medalíu"
     },
     "statuses": {
-      "running": "running",
-      "done": "done",
-      "queued": "queued"
+      "running": "í gangi",
+      "done": "lokið",
+      "queued": "í bið"
     },
     "panel": {
-      "pipeline": "mock chain pipeline",
-      "receipt": "mock chain receipt",
-      "step": "step {current} / {total}",
-      "explorerTitle": "mock explorer receipt",
-      "explorerBody": "The chain interaction is still mocked, but this panel exposes the same transaction checkpoints, objects, and gas surfaces the real explorer flow should reveal.",
-      "pending": "pending finality",
-      "finalized": "checkpoint finalized"
+      "pipeline": "hermikeðjuflæði",
+      "receipt": "hermikvittun",
+      "step": "skref {current} / {total}",
+      "explorerTitle": "hermikvittun könnuðar",
+      "explorerBody": "Keðjusamskiptin eru enn hermd, en þetta spjald sýnir sömu viðmiðunarpunkta færslu, hluti og gas-fleti og raunverulegt könnunarflæði ætti að sýna.",
+      "pending": "bíður lokastaðfestingar",
+      "finalized": "checkpoint lokið"
     },
     "sections": {
-      "transaction": "transaction summary",
-      "gas": "gas & effects",
-      "callArguments": "move call arguments",
-      "balanceChanges": "balance changes",
-      "claimPayload": "signed claim payload",
-      "events": "events",
-      "objectChanges": "object changes"
+      "transaction": "yfirlit færslu",
+      "gas": "gas og áhrif",
+      "callArguments": "inntök Move-kalls",
+      "balanceChanges": "stöðubreytingar",
+      "claimPayload": "undirritað innlausnarfarm",
+      "events": "atburðir",
+      "objectChanges": "hlutabreytingar"
     },
     "fields": {
-      "digest": "digest",
-      "checkpoint": "checkpoint",
-      "status": "status",
-      "epoch": "epoch",
-      "sender": "sender",
-      "package": "package",
-      "function": "function",
-      "target": "target",
-      "registry": "registry",
-      "template": "template",
-      "templateVersion": "template version",
-      "medalKind": "medal kind",
-      "object": "object",
-      "gasBudget": "gas budget",
-      "gasPrice": "gas price",
-      "gasPayment": "gas payment",
-      "gasUsed": "gas used",
-      "computationCost": "computation cost",
-      "storageCost": "storage cost",
-      "storageRebate": "storage rebate",
-      "nonRefundableStorageFee": "non-refundable storage fee",
-      "proofDigest": "proof digest",
-      "issuedAt": "issued at",
-      "deadline": "deadline",
-      "evidenceUri": "evidence uri",
-      "nonce": "nonce",
-      "signerPublicKey": "signer public key",
-      "signature": "signature",
-      "updatedAt": "updated at"
+      "digest": "ágrip",
+      "checkpoint": "staðfestipunktur",
+      "status": "staða",
+      "epoch": "epóka",
+      "sender": "sendandi",
+      "package": "pakki",
+      "function": "fall",
+      "target": "mark",
+      "registry": "skrá",
+      "template": "sniðmát",
+      "templateVersion": "sniðmátsútgáfa",
+      "medalKind": "tegund medalíu",
+      "object": "hlutur",
+      "gasBudget": "gas-heimild",
+      "gasPrice": "gas-verð",
+      "gasPayment": "gas-greiðsla",
+      "gasUsed": "notað gas",
+      "computationCost": "útreikningskostnaður",
+      "storageCost": "geymslukostnaður",
+      "storageRebate": "geymsluendurgreiðsla",
+      "nonRefundableStorageFee": "óendurgreiðanlegt geymslugjald",
+      "proofDigest": "sönnunar-ágrip",
+      "issuedAt": "útgefið",
+      "deadline": "frestur",
+      "evidenceUri": "URI sönnunargagna",
+      "nonce": "einkvæmt auðkenni",
+      "signerPublicKey": "opinn lykill undirritara",
+      "signature": "undirskrift",
+      "updatedAt": "uppfært"
     },
     "wallet": {
-      "eyebrow": "mock wallet approval",
-      "title": "Approve {action}",
-      "body": "Confirm the mock wallet request for {medalTitle}. Once approved, the interface will run the staged {action} pipeline, then settle into an explorer-style receipt.",
-      "close": "Close",
-      "cancel": "Cancel",
-      "confirm": "Approve {action}",
-      "estimateTitle": "estimated transaction footprint",
-      "callTitle": "programmable transaction inputs",
-      "claimPayloadTitle": "signed claim payload",
-      "note": "This is still a mock wallet surface. It does not touch a live chain, but it mirrors the approval rhythm a real wallet should expose before sign-and-submit.",
+      "eyebrow": "hermt veskissamþykki",
+      "title": "Samþykkja {action}",
+      "body": "Staðfestu hermdu veskibeiðnina fyrir {medalTitle}. Þegar hún er samþykkt keyrir viðmótið stigskipta {action} flæðið og lendir síðan í kvittun í könnunarstíl.",
+      "close": "Loka",
+      "cancel": "Hætta við",
+      "confirm": "Samþykkja {action}",
+      "estimateTitle": "áætlað umfang færslu",
+      "callTitle": "inntök forritanlegrar færslu",
+      "claimPayloadTitle": "undirritað innlausnarfarm",
+      "note": "Þetta er enn hermt veskiyfirborð. Það snertir ekki lifandi keðju, en speglar sama samþykkisflæði og raunverulegt veski ætti að sýna áður en það undirritar og sendir.",
       "actions": {
-        "mint": "Mint Medal",
-        "claim": "Claim Medal"
+        "mint": "Minta medalíu",
+        "claim": "Innlýsa medalíu"
       },
       "fields": {
-        "action": "Action",
-        "network": "Network",
-        "medal": "Medal",
-        "wallet": "Wallet",
-        "package": "Package",
-        "function": "Function",
-        "target": "Target",
-        "registry": "Registry",
-        "template": "Template",
-        "templateVersion": "Template version",
-        "medalKind": "Medal kind",
-        "object": "Object",
-        "gasBudget": "Gas budget",
-        "gasPrice": "Gas price",
-        "gasPayment": "Gas payment",
-        "storageRebate": "Storage rebate",
-        "proofDigest": "Proof digest",
-        "issuedAt": "Issued at",
-        "deadline": "Deadline",
-        "evidenceUri": "Evidence URI",
-        "nonce": "Nonce",
-        "signerPublicKey": "Signer public key",
-        "signature": "Signature"
+        "action": "Aðgerð",
+        "network": "Net",
+        "medal": "Medalía",
+        "wallet": "Veski",
+        "package": "Pakki",
+        "function": "Fall",
+        "target": "Mark",
+        "registry": "Skrá",
+        "template": "Sniðmát",
+        "templateVersion": "Sniðmátsútgáfa",
+        "medalKind": "Tegund medalíu",
+        "object": "Hlutur",
+        "gasBudget": "Gas-heimild",
+        "gasPrice": "Gas-verð",
+        "gasPayment": "Gas-greiðsla",
+        "storageRebate": "Geymsluendurgreiðsla",
+        "proofDigest": "Sönnunar-ágrip",
+        "issuedAt": "Útgefið",
+        "deadline": "Frestur",
+        "evidenceUri": "URI sönnunargagna",
+        "nonce": "Einkvæmt auðkenni",
+        "signerPublicKey": "Opinn lykill undirritara",
+        "signature": "Undirskrift"
       },
       "checklist": {
         "prepare": {
-          "label": "PTB scope",
-          "detail": "The transaction block is assembled around {medalTitle}, the target registry/template objects, and the current wallet."
+          "label": "Umfang PTB",
+          "detail": "Færslublokkin er sett saman í kringum {medalTitle}, markhluti skrár og sniðmáts, og núverandi veski."
         },
         "sign": {
-          "label": "Wallet approval",
-          "detail": "The wallet confirms intent first, then signs the transaction bytes before any broadcast step begins."
+          "label": "Samþykki vesks",
+          "detail": "Veskið staðfestir ásetning fyrst og undirritar síðan bæti færslunnar áður en nokkur útsending hefst."
         },
         "finalize": {
-          "label": "Explorer receipt",
-          "detail": "After broadcast and checkpoint finality, the UI preserves digest, object, gas, and settlement surfaces for review."
+          "label": "Könnunar-kvittun",
+          "detail": "Eftir útsendingu og lokastaðfestingu staðfestipunkts heldur viðmótið ágripi, hlutum, gasi og lokastöðu til yfirferðar."
         }
       }
     },
     "events": {
       "medalClaimed": {
-        "label": "EventMedalClaimed",
-        "detail": "The contract emitted the live-style medal claim event, binding {medalTitle} to the destination wallet."
+        "label": "Medalía innleyst",
+        "detail": "Samningurinn sendi frá sér lifandi innlausnaratburð og batt {medalTitle} við markveskið."
       },
       "proofVerified": {
-        "label": "Proof verified",
-        "detail": "Chronicle proof material for {medalTitle} has been validated and accepted into the transaction plan."
+        "label": "Sönnun staðfest",
+        "detail": "Sönnunargögn Chronicle fyrir {medalTitle} hafa verið staðfest og samþykkt inn í færsluáætlunina."
       },
       "transactionAssembled": {
-        "label": "Transaction assembled",
-        "detail": "The PTB has been composed with the required registry, template, and wallet targets."
+        "label": "Færsla sett saman",
+        "detail": "PTB hefur verið samsett með nauðsynlegum skráar-, sniðmáts- og veskimörkum."
       },
       "walletApproved": {
-        "label": "Wallet approved",
-        "detail": "The wallet has approved signing, so the payload is ready for broadcast."
+        "label": "Veski samþykkti",
+        "detail": "Veskið hefur samþykkt undirritun og því er farmurinn tilbúinn til útsendingar."
       },
       "medalBound": {
-        "label": "Medal bound",
-        "detail": "{medalTitle} has been written into a soulbound medal object and linked to the destination wallet."
+        "label": "Medalía bundin",
+        "detail": "{medalTitle} hefur verið skrifuð í óframseljanlegt medalíuobjekt og tengd markveskinu."
       },
       "claimTicketConsumed": {
-        "label": "Claim ticket consumed",
-        "detail": "The mock claim ticket has been marked as spent so the same claim cannot execute twice."
+        "label": "Innlausnarmiði notaður",
+        "detail": "Hermdi innlausnarmiðinn hefur verið merktur notaður svo sama innlausn geti ekki keyrt tvisvar."
       }
     },
     "objectChanges": {
       "roles": {
-        "medal": "medal object",
-        "registry": "registry object",
-        "template": "template object",
-        "claimTicket": "claim ticket",
-        "gasCoin": "gas coin"
+        "medal": "medalíuobjekt",
+        "registry": "skráarobjekt",
+        "template": "sniðmátsobjekt",
+        "claimTicket": "innlausnarmiði",
+        "gasCoin": "gas-mynt"
       },
       "kinds": {
-        "created": "created",
-        "mutated": "mutated",
-        "transferred": "transferred",
-        "deleted": "deleted"
+        "created": "búið til",
+        "mutated": "breytt",
+        "transferred": "flutt",
+        "deleted": "eytt"
       },
-      "owner": "owner // {owner}",
-      "ownerShared": "owner // Shared",
-      "ownerDeleted": "owner // deleted"
+      "owner": "eigandi // {owner}",
+      "ownerShared": "eigandi // sameiginlegt",
+      "ownerDeleted": "eigandi // eytt"
     },
     "stages": {
       "mint": {
         "prepare": {
-          "label": "Build Mint PTB",
-          "detail": "Assemble the public mint call for {medalTitle}, then lock the template object and recipient wallet."
+          "label": "Smíða myntunar-PTB",
+          "detail": "Settu saman opinbera myntunarkallið fyrir {medalTitle} og læstu síðan sniðmátsobjektinu og móttökiveskinu."
         },
         "simulate": {
-          "label": "Dry Run",
-          "detail": "Pre-execute the Move call to estimate gas, object writes, and storage rebate before signing."
+          "label": "Prufukeyrsla",
+          "detail": "Forkeyrðu Move kallið til að meta gas, hlutaskrif og geymsluendurgreiðslu áður en undirritað er."
         },
         "sign": {
-          "label": "Wallet Sign",
-          "detail": "Simulate wallet approval and signature generation so the payload is ready for broadcast."
+          "label": "Undirritun vesks",
+          "detail": "Hermdu samþykki vesks og myndun undirskriftar svo farmurinn sé tilbúinn til útsendingar."
         },
         "submit": {
-          "label": "Broadcast Tx",
-          "detail": "Broadcast the signed transaction into the mock testnet mempool and wait for ordering."
+          "label": "Senda færslu",
+          "detail": "Sendu undirritaða færsluna í hermda testnet mempoolið og bíddu eftir röðun."
         },
         "finalize": {
-          "label": "Mint Finalized",
-          "detail": "Checkpoint confirmation has landed. The medal object is written and ownership is bound to the current wallet."
+          "label": "Myntun staðfest",
+          "detail": "Checkpoint staðfestingin hefur lent. Medalíuobjektið er skrifað og eignin bundin við núverandi veski."
         }
       },
       "claim": {
         "prepare": {
-          "label": "Verify Proof",
-          "detail": "Verify the claim ticket, proof digest, and signer payload for {medalTitle} before building the transaction."
+          "label": "Staðfesta sönnun",
+          "detail": "Staðfestu innlausnarmiðann, sönnunar-ágripið og farm undirritara fyrir {medalTitle} áður en færslan er byggð."
         },
         "simulate": {
-          "label": "Build Claim PTB",
-          "detail": "Assemble the claim transaction block around the registry, claim ticket, and target wallet."
+          "label": "Smíða innlausnar-PTB",
+          "detail": "Settu saman innlausnarfærslublokkina í kringum skrána, innlausnarmiðann og markveskið."
         },
         "sign": {
-          "label": "Wallet Sign",
-          "detail": "Simulate wallet approval and signature generation for the claim payload."
+          "label": "Undirritun vesks",
+          "detail": "Hermdu samþykki vesks og myndun undirskriftar fyrir innlausnarfarminn."
         },
         "submit": {
-          "label": "Broadcast Tx",
-          "detail": "Submit the signed claim transaction into the mock mempool and wait for execution ordering."
+          "label": "Senda færslu",
+          "detail": "Sendu undirrituðu innlausnarfærsluna í hermda mempoolið og bíddu eftir keyrsluröðun."
         },
         "finalize": {
-          "label": "Claim Settled",
-          "detail": "Checkpoint confirmation is complete. The medal bind state is updated and ready for sharing."
+          "label": "Innlausn lokið",
+          "detail": "Checkpoint staðfesting er lokið. Bindistaða medalíunnar er uppfærð og tilbúin til deilingar."
         }
       }
     },
     "home": {
-      "eyebrow": "on-chain medal flow",
-      "title": "The homepage should already speak the same wallet-to-explorer language.",
-      "body": "Even before a live wallet interaction begins, the product should explain the same sequence the user will later see in Chronicle and Warrior: build the transaction, approve in wallet, broadcast it, then settle into a public receipt.",
+      "eyebrow": "keðjuflæði medalíu",
+      "title": "Forsíðan ætti nú þegar að tala sama tungumál frá veski yfir í könnuð.",
+      "body": "Jafnvel áður en lifandi veskissamskipti hefjast ætti varan að útskýra sömu röð og notandinn sér síðar í Chronicle og Warrior: byggja færsluna, samþykkja í veski, senda hana og enda svo í opinberri kvittun.",
       "steps": {
-        "prepare": "The player sees exactly what medal action is being assembled and why the transaction exists.",
-        "sign": "Approval is explicit. The wallet step should feel like a real sign gate instead of an invisible loading state.",
-        "submit": "Once approved, the transaction moves through a broadcast phase instead of teleporting straight to success.",
-        "finalize": "The final state is a shareable explorer-style receipt with digest, checkpoint, gas, and object surfaces."
+        "prepare": "Leikmaðurinn sér nákvæmlega hvaða medalíuaðgerð er verið að setja saman og af hverju færslan er til.",
+        "sign": "Samþykkið er skýrt. Veskisskrefið á að líða eins og raunveruleg undirritunarhlið í stað ósýnilegs hleðsluskjás.",
+        "submit": "Þegar samþykki liggur fyrir fer færslan í gegnum útsendingarfasa í stað þess að hoppa beint í árangur.",
+        "finalize": "Lokastaðan er deilanleg kvittun í könnunarstíl með ágripi, staðfestipunkti, gasi og hlutaflötum."
       }
     },
     "share": {
-      "eyebrow": "mock social handoff",
-      "body": "This share surface is the continuation of the same mock on-chain flow. The medal is settled first, then packaged into a reusable card and handed off into social channels.",
-      "launchTitle": "share launch links",
-      "receiptTitle": "linked transaction receipt",
-      "receiptAction": "settled action",
+      "eyebrow": "hermd samfélagsafhending",
+      "body": "Þetta deilingaryfirborð heldur áfram sama hermda flæði á keðju. Medalían er fyrst afgreidd og síðan pakkað í endurnýtanlegt spjald sem er sent áfram inn á samfélagsrásir.",
+      "launchTitle": "ræsilínkur deilingar",
+      "receiptTitle": "tengd færslukvittun",
+      "receiptAction": "afgreidd aðgerð",
       "notes": {
-        "handoff": "The QR path and share URL reopen the live medal verification page, so this share layer remains attached to live state instead of ending on a dead image.",
-        "social": "X, Telegram, and Discord are part of the same post-mint handoff. The narrative should feel like one flow, not a separate demo scene."
+        "handoff": "QR leiðin og deilingarslóðin opna lifandi medalíustaðfestingarsíðuna aftur, svo þetta deilingarlag helst tengt lifandi stöðu í stað þess að enda á dauðri mynd.",
+        "social": "X, Telegram og Discord eru hluti af sömu afhendingu eftir myntun. Frásögnin á að líða eins og eitt flæði, ekki eins og sérsýning."
       },
       "steps": {
         "receiptLocked": {
-          "label": "Receipt locked",
-          "detail": "{medalTitle} already has a settled transaction receipt, so the share asset can point back to a concrete on-chain-style outcome."
+          "label": "Kvittun læst",
+          "detail": "{medalTitle} er þegar með afgreidda færslukvittun, svo deilingareignin getur vísað aftur í skýra niðurstöðu í keðjustíl."
         },
         "assetPrepared": {
-          "label": "Asset prepared",
-          "detail": "The card renderer packages the medal state, QR path, and social preview format into a reusable distribution asset."
+          "label": "Eign undirbúin",
+          "detail": "Spjaldritarinn pakkar medalíustöðu, QR leið og samfélagsforskoðunarsniði í endurnýtanlega dreifingareign."
         },
         "socialHandoff": {
-          "label": "Social handoff",
-          "detail": "Platform actions launch directly from the medal receipt context instead of switching to a disconnected demo narrative."
+          "label": "Samfélagsafhending",
+          "detail": "Aðgerðir vettvanganna ræsa beint úr samhengi medalíukvittunarinnar í stað þess að hoppa yfir í ótengda sýningarsenu."
         }
       }
     }
@@ -529,7 +529,7 @@
   "medalShareDialog": {
     "closeAria": "Loka medalíu deilingarglugga",
     "close": "Loka",
-    "eyebrow": "medal share capsule",
+    "eyebrow": "medalíudeilingarhylki",
     "body": "Þetta deilingarspjald tengir beint á medalíusannprófunarsíðuna. Áfangasíðan endurhleður Chronicle sönnun og núverandi Sui medalíueigu fyrir markveskið.",
     "actions": {
       "copyLink": "Afrita slóð",
@@ -544,9 +544,9 @@
     },
     "shareLinks": "deilingarslóðir",
     "launchLinks": {
-      "xIntent": "X Intent",
-      "telegramShare": "Telegram Share",
-      "discordPasteFlow": "Discord Paste Flow"
+      "xIntent": "X deiling",
+      "telegramShare": "Telegram deiling",
+      "discordPasteFlow": "Discord límiflæði"
     },
     "previewAlt": "{subtitle} deilingarspjald forskoðun — {variant}",
     "toast": {
@@ -578,7 +578,7 @@
       "home": "Frontier Chronicle",
       "warrior": "Warrior prófíll"
     },
-    "eyebrow": "medal verification record",
+    "eyebrow": "medalíustaðfestingarskrá",
     "summarySuffix": "Þessi síða endurhleður nýjustu Chronicle myndinni og Sui eignastöðu fyrir markveskið í hvert skipti sem hún opnast.",
     "stats": {
       "wallet": "Veski",
@@ -589,16 +589,16 @@
     "evidenceTitle": "skráð sönnun",
     "evidenceFallback": "Chronicle hefur ekki enn birt sönnunarstreng fyrir þessa medalíu.",
     "requirementTitle": "viðmið",
-    "contextTitle": "frontier context",
+    "contextTitle": "Frontier samhengi",
     "stateTitle": "medalíuástand",
-    "whyTitle": "why this medal matters",
+    "whyTitle": "af hverju þessi medalía skiptir máli",
     "chips": {
       "rarity": "{rarity} medalía",
       "bound": "Bundið",
       "verified": "Staðfest",
       "locked": "Læst"
     },
-    "liveNote": "Ef þessi slóð kom úr samfélagsforskoðun er lendingin hér ekki kyrrstæð skjámynd. Hún endurreiknar Chronicle myndina og núverandi on-chain eignastöðu þegar hún opnast.",
+    "liveNote": "Ef þessi slóð kom úr samfélagsforskoðun er lendingin hér ekki kyrrstæð skjámynd. Hún endurreiknar Chronicle myndina og núverandi eignastöðu á keðju þegar hún opnast.",
     "actions": {
       "openWarrior": "Opna Warrior prófíl",
       "shareMedal": "Deila medalíu",
@@ -607,63 +607,63 @@
   },
   "chronicleDashboard": {
     "actions": {
-      "claimMedal": "Sækja medalíu",
+      "claimMedal": "Innlýsa medalíu",
       "mintMedal": "Minta medalíu"
     },
     "toast": {
-      "newClaimable": "Ný on-chain afrek eru tilbúin til claim.",
-      "mockMintReady": "Galactic Courier mock mint lokið. Deildu næst."
+      "newClaimable": "Ný afrek á keðju eru tilbúin til innlausnar.",
+      "mockMintReady": "Galactic Courier hermimyntun lokið. Deildu næst."
     },
     "errors": {
       "missingMedalConfig": "Medalíuuppsetning vantar",
-      "packageMissing": "Núverandi net hefur engan skilgreindan medals package",
-      "registryMissing": "Samnýtt medal registry hefur ekki enn fundist",
-      "claimTicketMissing": "Þetta afrek hefur ekki gilt claim ticket",
-      "templateMissing": "Þessi medalía hefur ekkert virkt on-chain sniðmát"
+      "packageMissing": "Núverandi net hefur engan skilgreindan medalíupakka",
+      "registryMissing": "Samnýtt medalíuskrá hefur ekki enn fundist",
+      "claimTicketMissing": "Þetta afrek hefur ekki gildan innlausnarmiða",
+      "templateMissing": "Þessi medalía hefur ekkert virkt sniðmát á keðju"
     },
     "connect": {
-      "eyebrow": "chronicle command deck",
+      "eyebrow": "Chronicle stjórnpallur",
       "title": "Tengdu veski svo kerfið viti hverjum á að skrifa chronicle.",
-      "body": "Þegar veskið er tengt dregur Chronicle leikmannamynd á virka netinu, athugar Eve Eyes skráningu, on-chain registry og claim stöðu medalía.",
-      "chip": "wallet in // proof out"
+      "body": "Þegar veskið er tengt dregur Chronicle leikmannamynd á virka netinu, athugar Eve Eyes skráningu, skrá á keðju og innlausnarstöðu medalía.",
+      "chip": "veski inn // sönnun út"
     },
     "error": {
-      "eyebrow": "chronicle failure",
+      "eyebrow": "Chronicle villa",
       "title": "Skönnun mistókst",
       "retry": "Reyna aftur",
       "rateLimited": "Eve Eyes er að takmarka skönnunina núna. Chronicle hefur þegar hægt á sér, en þetta veski þarf að reyna aftur eftir smá stund."
     },
     "groups": {
       "ready": {
-        "title": "Ready To Claim",
-        "description": "Þessar medalíur hafa þegar náð viðmiðinu. On-chain claim leiðin er opin núna.",
-        "empty": "Engar medalíur eru tilbúnar til claim núna."
+        "title": "Tilbúið til innlausnar",
+        "description": "Þessar medalíur hafa þegar náð viðmiðinu. Innlausnarleiðin á keðju er opin núna.",
+        "empty": "Engar medalíur eru tilbúnar til innlausnar núna."
       },
       "progress": {
-        "title": "In Progress",
+        "title": "Í vinnslu",
         "description": "Viðmiðinu er ekki enn náð, en kerfið heldur áfram að skrá Frontier slóðina þína.",
         "empty": "Engar medalíur eru í vinnslu. Núverandi sett er annað hvort þegar bundið eða ekki frumstillt enn."
       },
       "bound": {
-        "title": "Already Bound",
+        "title": "Þegar bundið",
         "description": "Þessi heiður er þegar bundinn við núverandi veski og er ekki lengur bara síðuástand.",
         "empty": "Núverandi veski hefur engar bundnar medalíur enn."
       }
     },
     "mock": {
-      "eyebrow": "mock mode active",
+      "eyebrow": "hermihamur virkur",
       "title": "Keyrðu demóið í þremur skrefum",
-      "body": "Allar on-chain aðgerðir eru mokkaðar, en sjónræn endurgjöf, deilingarspjöld og félagsleg stökk hegða sér enn eins og í raunflæðinu.",
+      "body": "Allar aðgerðir á keðju eru hermdar, en sjónræn endurgjöf, deilingarspjöld og félagsleg stökk hegða sér enn eins og í raunflæðinu.",
       "steps": {
         "one": {
           "time": "20s",
-          "title": "Smelltu á Mint Medal",
-          "detail": "Byrjaðu á Galactic Courier og myntaðu medalíuna í mock ham."
+          "title": "Smelltu á Minta medalíu",
+          "detail": "Byrjaðu á Galactic Courier og myntaðu medalíuna í hermiham."
         },
         "two": {
           "time": "30s",
-          "title": "Smelltu á Share Card",
-          "detail": "Opnaðu deilingarspjaldið og skiptu milli X, OG og Discord forma."
+          "title": "Smelltu á Deila spjaldi",
+          "detail": "Opnaðu deilingarspjaldið og skiptu milli X, OG og Discord sniða."
         },
         "three": {
           "time": "40s",
@@ -673,26 +673,26 @@
       }
     },
     "status": {
-      "mockMode": "Mock Mode",
+      "mockMode": "Hermihamur",
       "deepScan": "Djúp skönnun",
       "previewScan": "Forskoðunarskönnun",
       "readyNow": "{count} tilbúnar núna",
-      "noActiveClaim": "Ekkert virkt claim"
+      "noActiveClaim": "Engin virk innlausn"
     },
     "hero": {
-      "title": "pilot chronicle",
-      "body": "Þetta er ekki bara listi af medalíum. Það þýðir Frontier hegðun yfir í skýran viðmiðunarþröskuld, sönnun og on-chain claim stöðu."
+      "title": "flugmannaskrá",
+      "body": "Þetta er ekki bara listi af medalíum. Það þýðir Frontier hegðun yfir í skýran viðmiðunarþröskuld, sönnun og innlausnarstöðu á keðju."
     },
     "lore": {
-      "eyebrow": "frontier context",
-      "title": "Why these medals matter in the game world.",
-      "body": "Chronicle keeps the proof strict, but players still need world context. These notes explain why infrastructure, logistics, fuel, and transit matter in Frontier without changing the indexed evidence rules."
+      "eyebrow": "Frontier samhengi",
+      "title": "Af hverju þessar medalíur skipta máli í leikheiminum.",
+      "body": "Chronicle heldur sönnunarkröfunni strangri, en leikmenn þurfa samt samhengi úr heiminum. Þessar skýringar útskýra af hverju innviðir, flutningar, eldsneyti og ferðalög skipta máli í Frontier án þess að breyta reglunum um skráð sönnunargögn."
     },
     "metrics": {
       "claimReady": {
-        "label": "Claim tilbúið",
-        "ready": "Sumar medalíur uppfylla nú þegar on-chain claim skilyrðið",
-        "empty": "Engar nýjar medalíur eru tilbúnar til claim"
+        "label": "Innlausn tilbúin",
+        "ready": "Sumar medalíur uppfylla nú þegar innlausnarskilyrðið á keðju",
+        "empty": "Engar nýjar medalíur eru tilbúnar til innlausnar"
       },
       "indexedPages": {
         "label": "Skráðar síður",
@@ -706,12 +706,12 @@
       }
     },
     "recommendation": {
-      "eyebrow": "active recommendation",
-      "body": "Byrjaðu í Ready To Claim svo medalíur sem þegar uppfylla skilyrði sitji ekki auðar.",
-      "cta": "Opna claim biðröð"
+      "eyebrow": "virk tillaga",
+      "body": "Byrjaðu í Tilbúið til innlausnar svo medalíur sem þegar uppfylla skilyrði sitji ekki auðar.",
+      "cta": "Opna innlausnarröð"
     },
     "manifest": {
-      "eyebrow": "pilot manifest",
+      "eyebrow": "flugmannsyfirlit",
       "wallet": "Veski",
       "walletName": "Veski nafn",
       "unknownWallet": "Óþekkt veski",
@@ -719,18 +719,18 @@
       "noCharacter": "Engin persónutenging enn",
       "observedNetwork": "Athugað net",
       "noObservedNetwork": "Engin athuguð leið enn",
-      "worldPackage": "World package",
-      "noWorldPackage": "World package fannst ekki",
-      "packageExplorer": "Opna Package Explorer"
+      "worldPackage": "heimspakki",
+      "noWorldPackage": "heimspakki fannst ekki",
+      "packageExplorer": "Opna pakka-könnuð"
     },
     "compact": {
       "killmail": "Killmail",
-      "nodeAnchors": "Node Anchors",
-      "storageAnchors": "Storage Anchors",
-      "gateJumps": "Gate Jumps"
+      "nodeAnchors": "Hnútafestingar",
+      "storageAnchors": "Geymslufestingar",
+      "gateJumps": "Stjörnuhliðarstökk"
     },
     "evidence": {
-      "eyebrow": "indexed evidence",
+      "eyebrow": "skráð sönnunargögn",
       "title": "Sýndu hegðunarsönnunina áður en medalíuástandið kemur.",
       "body": "Leikmenn ættu fyrst að skilja hvaða Frontier slóðir voru fangaðar og svo ákveða hvort þeir ýti áfram að viðmiðinu."
     },
@@ -738,44 +738,46 @@
       "verified": "Staðfest",
       "tracking": "Í rekstri",
       "combat": {
-        "label": "Combat Trace",
-        "progress": "{current} / 5 staðfestar attacker skrár",
-        "detail": "Bardagamedalíur telja aðeins killmail attackers sem skrásetjarinn staðfestir."
+        "label": "Bardagaslóð",
+        "progress": "{current} / 5 staðfestir árásaratburðir",
+        "detail": "Bardagamedalíur telja aðeins árásaratburði úr killmail sem skrásetjarinn staðfestir."
       },
       "infrastructure": {
-        "label": "Infrastructure Trace",
-        "nodeLabel": "network node anchors",
-        "storageLabel": "storage unit anchors",
-        "detail": "Builder medalíur standast þegar leikmaður ankra annað hvort 1 network node eða 3 storage units."
+        "label": "Innviðaslóð",
+        "nodeLabel": "nethnútsfestingar",
+        "storageLabel": "geymslueiningafestingar",
+        "detail": "Smíðamedalíur standast þegar leikmaður festir annað hvort 1 nethnút eða 3 geymslueiningar."
       },
       "transit": {
-        "label": "Transit Ledger",
-        "progress": "{current} / 10 staðfest gate jumps",
-        "detail": "Gate jumps eru skýrasta Frontier merkið fyrir flutninga og leiðarvirkni."
+        "label": "Ferðabók",
+        "progress": "{current} / 10 staðfest stjörnuhliðarstökk",
+        "detail": "Stjörnuhliðarstökk eru skýrasta Frontier merkið fyrir flutninga og leiðavirkni."
       }
     },
     "card": {
       "sections": {
-        "whyItMatters": "why this matters"
+        "threshold": "viðmið",
+        "indexedEvidence": "skráð sönnunargögn",
+        "whyItMatters": "af hverju þetta skiptir máli"
       },
       "status": {
-        "bound": "Bound",
-        "ready": "Ready",
-        "verified": "Verified",
-        "tracking": "Tracking",
-        "awaitChain": "Await Chain",
-        "locked": "Locked"
+        "bound": "Bundið",
+        "ready": "Tilbúið",
+        "verified": "Staðfest",
+        "tracking": "Í rekstri",
+        "awaitChain": "Bíður keðju",
+        "locked": "Læst"
       },
       "detail": {
-        "bound": "This medal is already bound to the current wallet.",
-        "mintReady": "Threshold complete. Public mint is available now, so this medal can be written directly into the wallet.",
-        "claimReady": "Threshold complete. The on-chain claim path is live and ready to execute.",
-        "verified": "The threshold is already satisfied, but the on-chain bind route is not active yet.",
-        "tracking": "The threshold is not full yet. Keep leaving verifiable Frontier traces."
+        "bound": "Þessi medalía er þegar bundin við núverandi veski.",
+        "mintReady": "Viðmiðinu er náð. Opin myntun er tiltæk núna, svo hægt er að skrifa þessa medalíu beint í veskið.",
+        "claimReady": "Viðmiðinu er náð. Innlausnarleiðin á keðju er virk og tilbúin til keyrslu.",
+        "verified": "Viðmiðið er þegar uppfyllt, en bindileiðin á keðju er ekki orðin virk enn.",
+        "tracking": "Viðmiðið er ekki fullt enn. Haltu áfram að skilja eftir sannprófanleg Frontier spor."
       },
       "actions": {
-        "submitting": "Submitting...",
-        "shareCard": "Share Card"
+        "submitting": "Sendi...",
+        "shareCard": "Deila spjaldi"
       }
     }
   }

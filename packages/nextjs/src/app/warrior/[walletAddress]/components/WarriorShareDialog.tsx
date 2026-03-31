@@ -8,6 +8,7 @@ import {
   buildWarriorImagePath,
   buildWarriorSharePath,
   generateWarriorShareText,
+  getLocalizedWarriorRankSubtitle,
 } from '~~/warrior/share'
 import {
   copyShareValue,
@@ -88,6 +89,15 @@ export default function WarriorShareDialog({
       score,
       totalMedalCount,
     ]
+  )
+  const localizedRankSubtitle = useMemo(
+    () =>
+      getLocalizedWarriorRankSubtitle({
+        locale,
+        rankTitle,
+        rankTitleZh,
+      }),
+    [locale, rankTitle, rankTitleZh]
   )
 
   const handleCopy = async ({
@@ -174,7 +184,7 @@ export default function WarriorShareDialog({
                 {rankTitle}
               </h2>
               <p className="mt-2 text-base tracking-[0.18em] text-white/60">
-                {rankTitleZh}
+                {localizedRankSubtitle}
               </p>
               <p className="text-white/68 mt-5 max-w-xl text-sm leading-7">
                 {t('body')}

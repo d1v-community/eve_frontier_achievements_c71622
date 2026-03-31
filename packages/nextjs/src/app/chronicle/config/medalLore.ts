@@ -1,7 +1,7 @@
 import type { MedalSlug } from './medals'
 
 export type MedalLorePriority = 'primary' | 'secondary' | 'supporting'
-export type MedalLoreLocale = 'en' | 'zh-CN'
+export type MedalLoreLocale = 'en' | 'zh-CN' | 'is'
 
 export interface MedalLoreEntry {
   whyItMatters: string
@@ -189,10 +189,92 @@ const MEDAL_LORE_CATALOG: MedalLoreCatalog = {
       priority: 'primary',
     },
   },
+  is: {
+    'bloodlust-butcher': {
+      whyItMatters:
+        'Bardagamedalíur marka augnablikin þegar Frontier hættir að vera óhlutbundið og fer að svara með nöfnum, skrokkum og afleiðingum.',
+      frontierContext:
+        'Samfélagswikið rammar inn óvinveitt svæði og umdeilt geimrými sem daglegan hluta af því að lifa af, sem gefur þessari medalíu heimssamhengi þó sönnunin komi enn úr skráðri killmail virkni.',
+      shareNarrative:
+        '5 staðfest dráp, öll skráð. Bloodlust Butcher merkir nú augnablikin þegar afkoma í Frontier varð að skráðri bardagasögu. #EVEFrontier #FrontierChronicle',
+      wikiSources: [SITE_LIST_GUIDE, POI_GUIDE, FAQ_GUIDE],
+      priority: 'supporting',
+    },
+    'void-pioneer': {
+      whyItMatters:
+        'Að festa nethnút eða nóg af geymslueiningum breytir auðu rými í nýtanlegt yfirráðasvæði, ekki bara stað sem þú fórst hjá.',
+      frontierContext:
+        'Leiðarvísir samfélagsins tengir L-Points og minimum viable systems beint við grunnbyggingu, svo þessi medalía les eins og fyrsta varanlega merki landnáms á jaðrinum.',
+      shareNarrative:
+        'Ég fór ekki bara í gegnum tómið. Ég negldi innviði inn í það. Void Pioneer skráir nú fyrsta varanlega fótfestuna á Sui. #EVEFrontier #FrontierChronicle',
+      wikiSources: [POI_GUIDE, MVS_GUIDE, CORE_GUIDE],
+      priority: 'primary',
+    },
+    'galactic-courier': {
+      whyItMatters:
+        'Endurtekin stjörnuhliðarferð gerir flutningakerfið sýnilegt. Leiðir verða ekki að aðfangaleiðum nema einhver haldi áfram að fara þær.',
+      frontierContext:
+        'Wikið lýsir stjörnuhliðum sem bandvef hreyfingar milli kerfa, sem lætur þessa medalíu standa fyrir siðmenningarflutninga í stað hrárrar stökkatölu.',
+      shareNarrative:
+        '10 stjörnuhliðarstökk, öll skráð. Galactic Courier sannar að leiðir Frontier haldast lifandi því einhver heldur áfram að fara þær. #EVEFrontier #FrontierChronicle',
+      wikiSources: [FAQ_GUIDE, POI_GUIDE],
+      priority: 'primary',
+    },
+    'turret-sentry': {
+      whyItMatters:
+        'Turnvirkni segir að flugmaður hafi ákveðið að halda svæði, ekki bara ferðast í gegnum það.',
+      frontierContext:
+        'Síður wikisins um svæði og POI undirstrika að hættuleg svæði, NPC þrýstingur og varanlegar varnarlínur séu eðlilegur hluti Frontier, sem gefur þessari medalíu skýra varnarsvip.',
+      shareNarrative:
+        'Turnar online, jaðarinn haldinn. Turret Sentry varðveitir nú skrefið frá því að skima geiminn yfir í að verja hann virkt. #EVEFrontier #FrontierChronicle',
+      wikiSources: [SITE_LIST_GUIDE, POI_GUIDE, FAQ_GUIDE],
+      priority: 'supporting',
+    },
+    'assembly-pioneer': {
+      whyItMatters:
+        'Samsetningarsamskipti eru augnablikið þegar Frontier fer að framleiða. Þú ert ekki að ýta á viðmót, heldur að ýta lifandi framleiðslukeðju áfram.',
+      frontierContext:
+        'Assembler uppskriftirnar á wiki gera þessa medalíu læsilega sem innviðavinnu: aðföng, afurðir og tími breytast öll í raunverulegan framleiðsluskriðþunga.',
+      shareNarrative:
+        'Smart Assembly online. Assembly Pioneer markar nú vinnuna í framleiðslukeðjunni sem breytir birgðum í Frontier innviði. #EVEFrontier #FrontierChronicle',
+      wikiSources: [ASSEMBLER_GUIDE, CORE_GUIDE],
+      priority: 'primary',
+    },
+    'turret-anchor': {
+      whyItMatters:
+        'Festar varnir vega þyngra en tímabundin nærvera. Þær sýna langtímaákvörðun um að gera tilkall til stöðu og halda henni.',
+      frontierContext:
+        'Uppbygging staða á wiki og áherslan á afkomu á Frontier láta fest vopn líða minna eins og staka smelli og meira eins og fasta yfirlýsingu um landhelgi.',
+      shareNarrative:
+        'Turnar festir. Svæði lýst yfir. Turret Anchor skráir nú fasta varnarkröfu í stað tímabundinnar sýningar á valdi. #EVEFrontier #FrontierChronicle',
+      wikiSources: [SITE_LIST_GUIDE, POI_GUIDE, FAQ_GUIDE],
+      priority: 'supporting',
+    },
+    'ssu-trader': {
+      whyItMatters:
+        'Geymsluumferð er það sem breytir einangruðum útvörðum í starfandi aðfanganet með innstreymi, útstreymi og áreiðanlegri hringrás.',
+      frontierContext:
+        'Leiðarvísir leikmanna fjallar um geymslu, hreinsun og hreyfingu sem eina samfellda afkomukeðju, svo þessi medalía virkar best sem heiður fyrir hljóðlátt flutningastarf fremur en beran talnateljara.',
+      shareNarrative:
+        '5 SSU aðgerðir, allar skráðar. SSU Trader stendur fyrir hljóðláta flutningavinnuna sem heldur birgðum Frontier á hreyfingu. #EVEFrontier #FrontierChronicle',
+      wikiSources: [CORE_GUIDE, FAQ_GUIDE],
+      priority: 'primary',
+    },
+    'fuel-feeder': {
+      whyItMatters:
+        'Eldsneytisgjöf heldur hnútum lifandi. Án endurfyllingar eru innviðir Frontier bara dauð skel sem bíður eftir að slokkna.',
+      frontierContext:
+        'Síður wikisins um eldsneyti og hreinsun tengja saman vinnslu, hreinsun og notkun niðurstreymis, svo þessi medalía les eins og viðhaldsvinna sem heldur öllu netinu á lífi.',
+      shareNarrative:
+        '5 eldsneytisgjafir skráðar. Fuel Feeder heiðrar viðhaldsvinnuna sem heldur hnútum Frontier lifandi í stað þess að láta þá slokkna. #EVEFrontier #FrontierChronicle',
+      wikiSources: [D1_FUEL_GUIDE, PORTABLE_REFINERY_GUIDE, CORE_GUIDE],
+      priority: 'primary',
+    },
+  },
 }
 
 export const resolveMedalLoreLocale = (locale?: string): MedalLoreLocale =>
-  locale === 'zh-CN' ? 'zh-CN' : 'en'
+  locale === 'zh-CN' || locale === 'is' ? locale : 'en'
 
 export const getMedalLoreBySlug = (
   slug: MedalSlug,

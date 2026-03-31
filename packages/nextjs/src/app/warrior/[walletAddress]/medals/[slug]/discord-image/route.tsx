@@ -27,12 +27,14 @@ export async function GET(
   const locale = await getLocale()
   const { walletAddress, slug } = await params
   const { searchParams } = new URL(request.url)
-  const network = resolveWarriorNetwork(searchParams.get('network') ?? undefined)
+  const network = resolveWarriorNetwork(
+    searchParams.get('network') ?? undefined
+  )
   const isMockMode = isMockWarriorRoute(searchParams.get('m') ?? undefined)
   const claimedSlugs = resolveMockClaimedSlugs(
     searchParams.get('claimed') ?? undefined
   )
-  const definition = getMedalDefinitionBySlug(slug)
+  const definition = getMedalDefinitionBySlug(slug, locale)
 
   if (!isValidSuiAddress(walletAddress) || !definition) {
     const model = await buildFallbackMedalShareCardModel({
@@ -50,8 +52,8 @@ export async function GET(
 
   try {
     const snapshot = isMockMode
-      ? getMockRouteSnapshot(walletAddress, network, claimedSlugs)
-      : await getChronicleSnapshot(walletAddress, network)
+      ? getMockRouteSnapshot(walletAddress, network, claimedSlugs, locale)
+      : await getChronicleSnapshot(walletAddress, network, locale)
     const model = await buildMedalShareCardModel({
       snapshot,
       walletAddress,

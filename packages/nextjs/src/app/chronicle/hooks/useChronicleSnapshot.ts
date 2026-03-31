@@ -21,7 +21,8 @@ const resolveNetwork = (networkType: string | null | undefined) => {
 
 const useChronicleSnapshot = (
   walletAddress: string | undefined,
-  networkType: string | null | undefined
+  networkType: string | null | undefined,
+  locale?: string
 ) => {
   const [data, setData] = useState<ChronicleSnapshot | null>(null)
   const [error, setError] = useState<Error | null>(null)
@@ -50,9 +51,15 @@ const useChronicleSnapshot = (
           walletAddress,
           network: resolvedNetwork,
         })
-        const response = await fetch(`/api/chronicle?${searchParams.toString()}`, {
-          signal: controller.signal,
-        })
+        if (locale) {
+          searchParams.set('locale', locale)
+        }
+        const response = await fetch(
+          `/api/chronicle?${searchParams.toString()}`,
+          {
+            signal: controller.signal,
+          }
+        )
         const payload = await response.json()
 
         if (!response.ok) {
@@ -95,7 +102,7 @@ const useChronicleSnapshot = (
       active = false
       controller.abort()
     }
-  }, [refreshToken, resolvedNetwork, walletAddress])
+  }, [locale, refreshToken, resolvedNetwork, walletAddress])
 
   return {
     data,

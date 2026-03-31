@@ -759,6 +759,8 @@
     },
     "card": {
       "sections": {
+        "threshold": "threshold",
+        "indexedEvidence": "indexed evidence",
         "whyItMatters": "why this matters"
       },
       "status": {

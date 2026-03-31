@@ -159,7 +159,7 @@ export const WarriorShareImage = ({
               }}
             >
               {model.walletAddress
-                ? `Wallet ${model.walletAddressShort}`
+                ? `${model.labels.wallet} ${model.walletAddressShort}`
                 : model.labels.walletUnavailable}
             </div>
             <div
@@ -326,9 +326,9 @@ export const WarriorShareImage = ({
                     color: 'rgba(244,239,226,0.42)',
                     marginBottom: 12 * scale,
                   }}
-              >
-                {model.labels.medalPreview}
-              </div>
+                >
+                  {model.labels.medalPreview}
+                </div>
 
                 {model.previewMedals.length > 0 ? (
                   model.previewMedals.map((medal, index) => (
@@ -377,16 +377,18 @@ export const WarriorShareImage = ({
                           {medal.status}
                         </div>
                       </div>
-                      <div
-                        style={{
-                          display: 'flex',
-                          fontSize: 11 * scale,
-                          lineHeight: 1.4,
-                          color: 'rgba(244,239,226,0.56)',
-                        }}
-                      >
-                        {medal.title}
-                      </div>
+                      {medal.title !== medal.subtitle ? (
+                        <div
+                          style={{
+                            display: 'flex',
+                            fontSize: 11 * scale,
+                            lineHeight: 1.4,
+                            color: 'rgba(244,239,226,0.56)',
+                          }}
+                        >
+                          {medal.title}
+                        </div>
+                      ) : null}
                     </div>
                   ))
                 ) : (

@@ -1,4 +1,10 @@
 import type { MedalDefinition } from '~~/chronicle/config/medals'
+import {
+  buildStandardProgressLabel,
+  buildStandardProof,
+  buildVoidPioneerProgressLabel,
+  buildVoidPioneerProof,
+} from '~~/chronicle/config/businessCopy'
 import { getMedalDefinitionByKind } from '~~/chronicle/config/medals'
 import type {
   ChronicleClaimTicket,
@@ -53,9 +59,10 @@ const buildVoidPioneerMedal = (
   networkNodeAnchors: number,
   storageUnitAnchors: number,
   templateObjectId: string | null,
-  claimTicket: ChronicleClaimTicket | null
+  claimTicket: ChronicleClaimTicket | null,
+  locale?: string
 ): ChronicleMedalState => {
-  const definition = getMedalDefinitionByKind(2)
+  const definition = getMedalDefinitionByKind(2, locale)
 
   if (!definition) {
     throw new Error('Void Pioneer medal definition is missing')
@@ -69,11 +76,11 @@ const buildVoidPioneerMedal = (
     : Math.min(storageUnitAnchors, 3)
   const progressTarget = unlocked && networkNodeAnchors >= 1 ? 1 : 3
   const proof =
-    networkNodeAnchors >= 1
-      ? `Eve Eyes indexed ${networkNodeAnchors} successful network_node::anchor call(s).`
-      : storageUnitAnchors >= 3
-        ? `Eve Eyes indexed ${storageUnitAnchors} successful storage_unit::anchor call(s).`
-        : null
+    buildVoidPioneerProof({
+      networkNodeAnchors,
+      storageUnitAnchors,
+      locale,
+    })
 
   return {
     kind: definition.kind,
@@ -88,8 +95,14 @@ const buildVoidPioneerMedal = (
     claimable: unlocked && !claimed && claimTicket != null,
     progressCurrent,
     progressTarget,
-    progressPercent: unlocked ? 100 : clampPercent(progressCurrent, progressTarget),
-    progressLabel: `${networkNodeAnchors}/1 network node 或 ${storageUnitAnchors}/3 storage units`,
+    progressPercent: unlocked
+      ? 100
+      : clampPercent(progressCurrent, progressTarget),
+    progressLabel: buildVoidPioneerProgressLabel({
+      networkNodeAnchors,
+      storageUnitAnchors,
+      locale,
+    }),
     proof,
     templateObjectId,
     claimTicket,
@@ -100,17 +113,26 @@ export const buildMedalStates = (
   counts: ChronicleMetrics,
   claimedSlugs: Set<string>,
   claimTicketsByKind: Partial<Record<number, ChronicleClaimTicket>>,
-  activeTemplatesByKind: Map<number, ActiveMedalTemplate> = new Map()
+  activeTemplatesByKind: Map<number, ActiveMedalTemplate> = new Map(),
+  locale?: string
 ): ChronicleMedalState[] => {
-  const bloodlust = getMedalDefinitionByKind(1)
-  const courier = getMedalDefinitionByKind(3)
-  const turretSentry = getMedalDefinitionByKind(4)
-  const assemblyPioneer = getMedalDefinitionByKind(5)
-  const turretAnchor = getMedalDefinitionByKind(6)
-  const ssuTrader = getMedalDefinitionByKind(7)
-  const fuelFeeder = getMedalDefinitionByKind(8)
+  const bloodlust = getMedalDefinitionByKind(1, locale)
+  const courier = getMedalDefinitionByKind(3, locale)
+  const turretSentry = getMedalDefinitionByKind(4, locale)
+  const assemblyPioneer = getMedalDefinitionByKind(5, locale)
+  const turretAnchor = getMedalDefinitionByKind(6, locale)
+  const ssuTrader = getMedalDefinitionByKind(7, locale)
+  const fuelFeeder = getMedalDefinitionByKind(8, locale)
 
-  if (!bloodlust || !courier || !turretSentry || !assemblyPioneer || !turretAnchor || !ssuTrader || !fuelFeeder) {
+  if (
+    !bloodlust ||
+    !courier ||
+    !turretSentry ||
+    !assemblyPioneer ||
+    !turretAnchor ||
+    !ssuTrader ||
+    !fuelFeeder
+  ) {
     throw new Error('Medal catalog is incomplete')
   }
 
@@ -121,9 +143,18 @@ export const buildMedalStates = (
       5,
       claimedSlugs.has(bloodlust.slug),
       counts.killmailAttacks >= 5
-        ? `Eve Eyes indexed ${counts.killmailAttacks} confirmed killmail attacker call(s).`
+        ? buildStandardProof({
+            slug: bloodlust.slug,
+            current: counts.killmailAttacks,
+            locale,
+          })
         : null,
-      `${counts.killmailAttacks} / 5 indexed killmail attacker records`,
+      buildStandardProgressLabel({
+        slug: bloodlust.slug,
+        current: counts.killmailAttacks,
+        target: 5,
+        locale,
+      }),
       activeTemplatesByKind.get(bloodlust.kind)?.objectId ?? null,
       claimTicketsByKind[bloodlust.kind] || null
     ),
@@ -132,7 +163,8 @@ export const buildMedalStates = (
       counts.networkNodeAnchors,
       counts.storageUnitAnchors,
       activeTemplatesByKind.get(2)?.objectId ?? null,
-      claimTicketsByKind[2] || null
+      claimTicketsByKind[2] || null,
+      locale
     ),
     buildStandardMedal(
       courier,
@@ -140,9 +172,18 @@ export const buildMedalStates = (
       10,
       claimedSlugs.has(courier.slug),
       counts.gateJumps >= 10
-        ? `Eve Eyes indexed ${counts.gateJumps} successful gate::jump call(s).`
+        ? buildStandardProof({
+            slug: courier.slug,
+            current: counts.gateJumps,
+            locale,
+          })
         : null,
-      `${counts.gateJumps} / 10 verified gate jumps`,
+      buildStandardProgressLabel({
+        slug: courier.slug,
+        current: counts.gateJumps,
+        target: 10,
+        locale,
+      }),
       activeTemplatesByKind.get(courier.kind)?.objectId ?? null,
       claimTicketsByKind[courier.kind] || null
     ),
@@ -152,9 +193,18 @@ export const buildMedalStates = (
       3,
       claimedSlugs.has(turretSentry.slug),
       counts.turretOps >= 3
-        ? `Eve Eyes indexed ${counts.turretOps} turret operation(s).`
+        ? buildStandardProof({
+            slug: turretSentry.slug,
+            current: counts.turretOps,
+            locale,
+          })
         : null,
-      `${counts.turretOps} / 3 indexed turret operations`,
+      buildStandardProgressLabel({
+        slug: turretSentry.slug,
+        current: counts.turretOps,
+        target: 3,
+        locale,
+      }),
       activeTemplatesByKind.get(turretSentry.kind)?.objectId ?? null,
       claimTicketsByKind[turretSentry.kind] || null
     ),
@@ -164,9 +214,18 @@ export const buildMedalStates = (
       3,
       claimedSlugs.has(assemblyPioneer.slug),
       counts.assemblyOps >= 3
-        ? `Eve Eyes indexed ${counts.assemblyOps} Smart Assembly interaction(s).`
+        ? buildStandardProof({
+            slug: assemblyPioneer.slug,
+            current: counts.assemblyOps,
+            locale,
+          })
         : null,
-      `${counts.assemblyOps} / 3 Smart Assembly interactions`,
+      buildStandardProgressLabel({
+        slug: assemblyPioneer.slug,
+        current: counts.assemblyOps,
+        target: 3,
+        locale,
+      }),
       activeTemplatesByKind.get(assemblyPioneer.kind)?.objectId ?? null,
       claimTicketsByKind[assemblyPioneer.kind] || null
     ),
@@ -176,9 +235,18 @@ export const buildMedalStates = (
       3,
       claimedSlugs.has(turretAnchor.slug),
       counts.turretAnchors >= 3
-        ? `Eve Eyes indexed ${counts.turretAnchors} turret::anchor call(s).`
+        ? buildStandardProof({
+            slug: turretAnchor.slug,
+            current: counts.turretAnchors,
+            locale,
+          })
         : null,
-      `${counts.turretAnchors} / 3 turret anchor deployments`,
+      buildStandardProgressLabel({
+        slug: turretAnchor.slug,
+        current: counts.turretAnchors,
+        target: 3,
+        locale,
+      }),
       activeTemplatesByKind.get(turretAnchor.kind)?.objectId ?? null,
       claimTicketsByKind[turretAnchor.kind] || null
     ),
@@ -188,9 +256,18 @@ export const buildMedalStates = (
       5,
       claimedSlugs.has(ssuTrader.slug),
       counts.ssuTradeOps >= 5
-        ? `Eve Eyes indexed ${counts.ssuTradeOps} SSU deposit/withdraw call(s).`
+        ? buildStandardProof({
+            slug: ssuTrader.slug,
+            current: counts.ssuTradeOps,
+            locale,
+          })
         : null,
-      `${counts.ssuTradeOps} / 5 SSU deposit or withdraw operations`,
+      buildStandardProgressLabel({
+        slug: ssuTrader.slug,
+        current: counts.ssuTradeOps,
+        target: 5,
+        locale,
+      }),
       activeTemplatesByKind.get(ssuTrader.kind)?.objectId ?? null,
       claimTicketsByKind[ssuTrader.kind] || null
     ),
@@ -200,9 +277,18 @@ export const buildMedalStates = (
       5,
       claimedSlugs.has(fuelFeeder.slug),
       counts.networkNodeFuels >= 5
-        ? `Eve Eyes indexed ${counts.networkNodeFuels} network_node::feed_fuel call(s).`
+        ? buildStandardProof({
+            slug: fuelFeeder.slug,
+            current: counts.networkNodeFuels,
+            locale,
+          })
         : null,
-      `${counts.networkNodeFuels} / 5 network node fuel feeds`,
+      buildStandardProgressLabel({
+        slug: fuelFeeder.slug,
+        current: counts.networkNodeFuels,
+        target: 5,
+        locale,
+      }),
       activeTemplatesByKind.get(fuelFeeder.kind)?.objectId ?? null,
       claimTicketsByKind[fuelFeeder.kind] || null
     ),

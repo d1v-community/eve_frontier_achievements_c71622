@@ -21,7 +21,7 @@ export interface MedalShareCardTone {
 
 export interface MedalShareCardModel {
   title: string
-  titleZh: string
+  titleZh: string | null
   rarity: string
   requirement: string
   proofLabel: string
@@ -57,8 +57,7 @@ const getMedalShareCopy = (locale?: string) => {
         fallbackTitleZh: '勋章快照',
         unavailable: '暂不可用',
         fallbackRequirement: '当前无法提供这枚勋章快照。',
-        fallbackProof:
-          '当前无法加载这枚勋章的快照数据。',
+        fallbackProof: '当前无法加载这枚勋章的快照数据。',
         fallbackStatus: '快照不可用',
         fallbackSummary: 'Frontier Chronicle 现在无法验证这枚勋章快照。',
         metaFallbackTitle: `勋章快照 — ${APP_NAME}`,
@@ -93,39 +92,43 @@ const getMedalShareCopy = (locale?: string) => {
     case 'is':
       return {
         fallbackTitle: 'Medal Snapshot',
-        fallbackTitleZh: 'Medal Snapshot',
-        unavailable: 'Ófáanlegt',
-        fallbackRequirement: 'Þessi medalíumynd er ekki tiltæk í augnablikinu.',
-        fallbackProof: 'Ekki tókst að hlaða snapshot gögnum fyrir þessa medalíu núna.',
-        fallbackStatus: 'Snapshot ófáanlegt',
-        fallbackSummary: 'Frontier Chronicle gat ekki staðfest þessa medalíumynd í augnablikinu.',
+        fallbackTitleZh: 'Medalíuskyndimynd',
+        unavailable: 'Ófáanleg',
+        fallbackRequirement: 'Þessi medalíuskyndimynd er ekki tiltæk í augnablikinu.',
+        fallbackProof:
+          'Ekki tókst að hlaða gögnum fyrir þessa medalíuskyndimynd núna.',
+        fallbackStatus: 'SKYNDIMYND ÓFÁANLEG',
+        fallbackSummary:
+          'Frontier Chronicle gat ekki staðfest þessa medalíuskyndimynd í augnablikinu.',
         metaFallbackTitle: `Medal Snapshot — ${APP_NAME}`,
-        metaFallbackDescription: 'Frontier Chronicle medal snapshot',
-        metaAlt: 'Medal verification share card',
+        metaFallbackDescription: 'Frontier Chronicle medalíuskyndimynd',
+        metaAlt: 'medalíustaðfestingarspjald',
         statuses: {
           bound: {
-            label: 'BUNDIÐ Á KEÐJU',
+            label: 'BUNDIÐ',
             summary: 'Þessi medalía er nú bundin við veskið á Sui.',
           },
           verified: {
-            label: 'VIRKNI STAÐFEST',
-            summary: 'Chronicle hefur staðfest virknina, en hún er ekki enn bundin á keðju.',
+            label: 'STAÐFEST',
+            summary:
+              'Chronicle hefur staðfest virknina, en hún er ekki enn bundin á keðju.',
           },
           locked: {
             label: 'LÆST',
-            summary: 'Chronicle hefur ekki enn skráð nægilega Frontier sönnun fyrir þessa medalíu.',
+            summary:
+              'Chronicle hefur ekki enn skráð nægileg Frontier sönnunargögn fyrir þessa medalíu.',
           },
         },
         labels: {
-          eyebrow: 'Frontier Chronicle · Medal Verification',
-          evidence: 'Chronicle Evidence',
-          rarity: 'Rarity',
-          requirement: 'Requirement',
-          wallet: 'Wallet',
+          eyebrow: 'Frontier Chronicle · Medalíustaðfesting',
+          evidence: 'Chronicle sönnun',
+          rarity: 'Sjaldgæfni',
+          requirement: 'Viðmið',
+          wallet: 'Veski',
           unknownWallet: 'Óþekkt veski',
-          character: 'Character',
-          qrAlt: 'Medal verification QR code',
-          qrHint: 'Scan to open the medal verification page',
+          character: 'Persóna',
+          qrAlt: 'QR-kóði medalíustaðfestingar',
+          qrHint: 'Skannaðu til að opna medalíustaðfestingarsíðuna',
         },
       }
     default:
@@ -134,9 +137,11 @@ const getMedalShareCopy = (locale?: string) => {
         fallbackTitleZh: 'Medal Snapshot',
         unavailable: 'Unavailable',
         fallbackRequirement: 'This medal snapshot is not currently available.',
-        fallbackProof: 'Snapshot data could not be loaded for this medal right now.',
+        fallbackProof:
+          'Snapshot data could not be loaded for this medal right now.',
         fallbackStatus: 'SNAPSHOT UNAVAILABLE',
-        fallbackSummary: 'Frontier Chronicle could not verify this medal snapshot right now.',
+        fallbackSummary:
+          'Frontier Chronicle could not verify this medal snapshot right now.',
         metaFallbackTitle: `Medal Snapshot — ${APP_NAME}`,
         metaFallbackDescription: 'Frontier Chronicle medal snapshot',
         metaAlt: 'Medal verification share card',
@@ -224,7 +229,10 @@ const TONE_MAP: Record<MedalTone, MedalShareCardTone> = {
   },
 }
 
-const formatWalletAddress = (walletAddress: string | null, fallback: string) => {
+const formatWalletAddress = (
+  walletAddress: string | null,
+  fallback: string
+) => {
   if (!walletAddress || walletAddress.length < 14) {
     return walletAddress || fallback
   }
@@ -273,9 +281,10 @@ export const buildMedalShareCardModel = async ({
   slug: MedalSlug
   locale?: string
 }): Promise<MedalShareCardModel> => {
-  const copy = getMedalShareCopy(locale)
+  const resolvedLocale = resolveLocale(locale)
+  const copy = getMedalShareCopy(resolvedLocale)
   const medal = getSnapshotMedal(snapshot, slug)
-  const definition = getMedalDefinitionBySlug(slug)
+  const definition = getMedalDefinitionBySlug(slug, resolvedLocale)
 
   if (!medal || !definition) {
     throw new Error('Medal snapshot could not be resolved')
@@ -289,12 +298,15 @@ export const buildMedalShareCardModel = async ({
 
   return {
     title: definition.subtitle,
-    titleZh: definition.title,
+    titleZh: definition.title === definition.subtitle ? null : definition.title,
     rarity: definition.rarity,
-    requirement: definition.requirement,
+    requirement: medal.requirement,
     proofLabel: truncateProof(medal.proof, locale),
     labels: copy.labels,
-    walletAddressShort: formatWalletAddress(walletAddress, copy.labels.unknownWallet),
+    walletAddressShort: formatWalletAddress(
+      walletAddress,
+      copy.labels.unknownWallet
+    ),
     characterId: snapshot.profile.characterId,
     network: network.toUpperCase(),
     statusLabel: status.label,
@@ -316,8 +328,9 @@ export const buildFallbackMedalShareCardModel = async ({
   slug: string
   locale?: string
 }): Promise<MedalShareCardModel> => {
-  const copy = getMedalShareCopy(locale)
-  const definition = getMedalDefinitionBySlug(slug)
+  const resolvedLocale = resolveLocale(locale)
+  const copy = getMedalShareCopy(resolvedLocale)
+  const definition = getMedalDefinitionBySlug(slug, resolvedLocale)
   const shareUrl = toAbsoluteSiteUrl(
     walletAddress && definition
       ? buildMedalSharePath(walletAddress, definition.slug, network, { locale })
@@ -328,13 +341,20 @@ export const buildFallbackMedalShareCardModel = async ({
 
   return {
     title: definition?.subtitle || copy.fallbackTitle,
-    titleZh: definition?.title || copy.fallbackTitleZh,
+    titleZh:
+      definition && definition.title !== definition.subtitle
+        ? definition.title
+        : definition
+          ? null
+          : copy.fallbackTitleZh,
     rarity: definition?.rarity || copy.unavailable,
-    requirement:
-      definition?.requirement || copy.fallbackRequirement,
+    requirement: definition?.requirement || copy.fallbackRequirement,
     proofLabel: copy.fallbackProof,
     labels: copy.labels,
-    walletAddressShort: formatWalletAddress(walletAddress, copy.labels.unknownWallet),
+    walletAddressShort: formatWalletAddress(
+      walletAddress,
+      copy.labels.unknownWallet
+    ),
     characterId: null,
     network: network.toUpperCase(),
     statusLabel: copy.fallbackStatus,
@@ -361,7 +381,10 @@ export const buildMedalPageMetadata = ({
   const resolvedLocale = resolveLocale(locale)
   const copy = getMedalShareCopy(resolvedLocale)
   const medal = getSnapshotMedal(snapshot, slug)
-  const definition = getMedalDefinitionBySlug(slug)
+  const definition = getMedalDefinitionBySlug(
+    slug,
+    resolvedLocale
+  )
 
   if (!medal || !definition) {
     return {
@@ -372,7 +395,9 @@ export const buildMedalPageMetadata = ({
 
   const status = getMedalStatus(medal, resolvedLocale)
   const canonicalUrl = toAbsoluteSiteUrl(
-    buildMedalSharePath(walletAddress, slug, network, { locale: resolvedLocale })
+    buildMedalSharePath(walletAddress, slug, network, {
+      locale: resolvedLocale,
+    })
   )
   const ogImageUrl = toAbsoluteSiteUrl(
     buildMedalImagePath(walletAddress, slug, network, 'opengraph', {
@@ -404,7 +429,10 @@ export const buildMedalPageMetadata = ({
     openGraph: {
       type: 'website',
       url: canonicalUrl,
-      title: `${definition.subtitle} (${definition.title}) — ${APP_NAME}`,
+      title:
+        definition.title !== definition.subtitle
+          ? `${definition.subtitle} (${definition.title}) — ${APP_NAME}`
+          : `${definition.subtitle} — ${APP_NAME}`,
       description,
       siteName: APP_NAME,
       images: [
@@ -416,7 +444,7 @@ export const buildMedalPageMetadata = ({
             resolvedLocale === 'zh-CN'
               ? `${definition.subtitle} 勋章验证分享卡`
               : resolvedLocale === 'is'
-                ? `${definition.subtitle} medal verification share card`
+                ? `${definition.subtitle} medalíustaðfestingarspjald`
                 : `${definition.subtitle} medal verification share card`,
         },
       ],

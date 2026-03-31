@@ -117,17 +117,19 @@ export const MedalShareImage = ({
               >
                 {model.title}
               </div>
-              <div
-                style={{
-                  display: 'flex',
-                  fontSize: 24 * scale,
-                  lineHeight: 1.2,
-                  letterSpacing: `${1.8 * scale}px`,
-                  color: 'rgba(244,239,226,0.76)',
-                }}
-              >
-                {model.titleZh}
-              </div>
+              {model.titleZh ? (
+                <div
+                  style={{
+                    display: 'flex',
+                    fontSize: 24 * scale,
+                    lineHeight: 1.2,
+                    letterSpacing: `${1.8 * scale}px`,
+                    color: 'rgba(244,239,226,0.76)',
+                  }}
+                >
+                  {model.titleZh}
+                </div>
+              ) : null}
             </div>
 
             <div
@@ -196,7 +198,9 @@ export const MedalShareImage = ({
                 marginBottom: 8 * scale,
               }}
             >
-              <span>{model.labels.wallet} {model.walletAddressShort}</span>
+              <span>
+                {model.labels.wallet} {model.walletAddressShort}
+              </span>
               <span>Sui {model.network}</span>
             </div>
             {model.characterId ? (

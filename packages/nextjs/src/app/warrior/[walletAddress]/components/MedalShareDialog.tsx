@@ -6,7 +6,11 @@ import type { MockMedalTxReceipt } from '~~/chronicle/mock/mockTransaction'
 import type { ChronicleMedalState } from '~~/chronicle/types'
 import { notification } from '~~/helpers/notification'
 import type { ENetwork } from '~~/types/ENetwork'
-import { buildMedalImagePath, buildMedalSharePath, generateMedalShareText } from '~~/warrior/share'
+import {
+  buildMedalImagePath,
+  buildMedalSharePath,
+  generateMedalShareText,
+} from '~~/warrior/share'
 import {
   copyShareValue,
   downloadShareAsset,
@@ -40,11 +44,13 @@ export default function MedalShareDialog({
   mockReceipt,
   onClose,
 }: MedalShareDialogProps) {
-  const [previewVariant, setPreviewVariant] = useState<ImageVariant>('opengraph')
+  const [previewVariant, setPreviewVariant] =
+    useState<ImageVariant>('opengraph')
   const locale = useLocale()
   const t = useTranslations('medalShareDialog')
   const mockT = useTranslations('mockFlow')
   const shareT = useTranslations('mockFlow.share')
+  const hasSecondaryTitle = medal.title !== medal.subtitle
 
   useEffect(() => {
     const previousOverflow = document.body.style.overflow
@@ -193,9 +199,11 @@ export default function MedalShareDialog({
               <h2 className="mt-4 font-display text-4xl uppercase tracking-[0.08em] text-[#f4efe2]">
                 {medal.subtitle}
               </h2>
-              <p className="mt-2 text-base tracking-[0.18em] text-white/60">
-                {medal.title}
-              </p>
+              {hasSecondaryTitle ? (
+                <p className="mt-2 text-base tracking-[0.18em] text-white/60">
+                  {medal.title}
+                </p>
+              ) : null}
               <p className="text-white/68 mt-5 max-w-xl text-sm leading-7">
                 {dialogBody}
               </p>
@@ -214,20 +222,20 @@ export default function MedalShareDialog({
                   {shareT('eyebrow')}
                 </div>
                 <div className="mt-4 grid gap-3">
-                  {([
-                    'receiptLocked',
-                    'assetPrepared',
-                    'socialHandoff',
-                  ] as const).map((step) => (
+                  {(
+                    ['receiptLocked', 'assetPrepared', 'socialHandoff'] as const
+                  ).map((step) => (
                     <div
                       key={step}
-                      className="border border-white/10 bg-black/18 px-4 py-4"
+                      className="bg-black/18 border border-white/10 px-4 py-4"
                     >
                       <div className="font-mono text-[0.6rem] uppercase tracking-[0.22em] text-[#ffd2c2]">
                         {shareT(`steps.${step}.label`)}
                       </div>
-                      <div className="mt-2 text-xs leading-6 text-[#f4efe2]/68">
-                        {shareT(`steps.${step}.detail`, { medalTitle: medal.title })}
+                      <div className="text-[#f4efe2]/68 mt-2 text-xs leading-6">
+                        {shareT(`steps.${step}.detail`, {
+                          medalTitle: medal.title,
+                        })}
                       </div>
                     </div>
                   ))}
@@ -282,7 +290,9 @@ export default function MedalShareDialog({
                   key={action.label}
                   type="button"
                   onClick={action.onClick}
-                  onMouseEnter={() => action.variant && setPreviewVariant(action.variant)}
+                  onMouseEnter={() =>
+                    action.variant && setPreviewVariant(action.variant)
+                  }
                   className="rounded-[1.1rem] border px-4 py-4 text-left font-mono text-[0.68rem] uppercase tracking-[0.22em] transition-transform hover:-translate-y-0.5"
                   style={{
                     background: action.shell,
@@ -337,7 +347,7 @@ export default function MedalShareDialog({
                     href={href}
                     target="_blank"
                     rel="noreferrer"
-                    className="border border-white/10 bg-black/18 px-4 py-3 font-mono text-[0.6rem] uppercase tracking-[0.2em] text-[#f4efe2]/76 transition-transform hover:-translate-y-0.5 hover:border-[#f0642f]/28 hover:text-[#f4efe2]"
+                    className="bg-black/18 text-[#f4efe2]/76 hover:border-[#f0642f]/28 border border-white/10 px-4 py-3 font-mono text-[0.6rem] uppercase tracking-[0.2em] transition-transform hover:-translate-y-0.5 hover:text-[#f4efe2]"
                   >
                     {label}
                   </a>
@@ -366,7 +376,10 @@ export default function MedalShareDialog({
                       v === previewVariant
                         ? 'rgba(240,100,47,0.14)'
                         : 'rgba(255,255,255,0.03)',
-                    color: v === previewVariant ? '#f0642f' : 'rgba(244,239,226,0.52)',
+                    color:
+                      v === previewVariant
+                        ? '#f0642f'
+                        : 'rgba(244,239,226,0.52)',
                   }}
                 >
                   {VARIANT_LABELS[v]}
@@ -385,27 +398,27 @@ export default function MedalShareDialog({
                 <div className="font-mono text-[0.62rem] uppercase tracking-[0.3em] text-[#f0642f]">
                   {shareT('receiptTitle')}
                 </div>
-                <div className="mt-4 grid gap-2 text-xs leading-6 text-[#f4efe2]/68 sm:grid-cols-2">
+                <div className="text-[#f4efe2]/68 mt-4 grid gap-2 text-xs leading-6 sm:grid-cols-2">
                   <div>
-                    <span className="font-mono uppercase tracking-[0.14em] text-white/42">
+                    <span className="text-white/42 font-mono uppercase tracking-[0.14em]">
                       {mockT('fields.digest')}
                     </span>{' '}
                     {mockReceipt.digest}
                   </div>
                   <div>
-                    <span className="font-mono uppercase tracking-[0.14em] text-white/42">
+                    <span className="text-white/42 font-mono uppercase tracking-[0.14em]">
                       {mockT('fields.checkpoint')}
                     </span>{' '}
                     #{mockReceipt.checkpoint}
                   </div>
                   <div>
-                    <span className="font-mono uppercase tracking-[0.14em] text-white/42">
+                    <span className="text-white/42 font-mono uppercase tracking-[0.14em]">
                       {mockT('fields.object')}
                     </span>{' '}
                     {mockReceipt.objectId.slice(0, 18)}...
                   </div>
                   <div>
-                    <span className="font-mono uppercase tracking-[0.14em] text-white/42">
+                    <span className="text-white/42 font-mono uppercase tracking-[0.14em]">
                       {shareT('receiptAction')}
                     </span>{' '}
                     {mockT(`actions.${mockReceipt.action}`)}

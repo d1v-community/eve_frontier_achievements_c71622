@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import type {
   ChronicleMedalState,
   ChronicleSnapshot,
+  CombatRank,
   RankTone,
 } from '~~/chronicle/types'
 import { APP_NAME } from '~~/config/main'
@@ -34,6 +35,7 @@ export interface WarriorShareCardModel {
     verified: string
     walletUnavailable: string
     unknownWallet: string
+    wallet: string
     combatScore: string
     network: string
     medalsBound: string
@@ -112,8 +114,102 @@ const MEDAL_COLOR_MAP: Record<string, string> = {
   'fuel-feeder': '#8ea1ad',
 }
 
+const RANK_COPY = {
+  'zh-CN': {
+    0: {
+      title: '虚空漂泊者',
+      description: '当前还没有可验证的成就记录。',
+    },
+    1: {
+      title: '边境征兵',
+      description: '你踏入 Frontier 的第一批轨迹已经被记录。',
+    },
+    2: {
+      title: '星区行动员',
+      description: '多个行为域的操作存在已经被确认。',
+    },
+    3: {
+      title: '虚空游骑兵',
+      description: '你已经拥有可验证的战斗与探索履历。',
+    },
+    4: {
+      title: '指挥先锋',
+      description: '你冲在前面，成就横跨战斗、物流与基础设施。',
+    },
+    5: {
+      title: '战主候选',
+      description: '这是一股正在上升的力量，任何舰队都会重视你的履历。',
+    },
+    6: {
+      title: '边境元帅',
+      description: '经受过战火，并已在链上留下验证记录，Frontier 会记住你。',
+    },
+    7: {
+      title: '至高主权者',
+      description: '你在 Frontier 各个领域都达成了绝对统治，无可置疑。',
+    },
+  },
+  is: {
+    0: {
+      title: 'Rekandi tómsins',
+      description: 'Engin staðfest afrek eru enn á skrá.',
+    },
+    1: {
+      title: 'Frontier nýliði',
+      description: 'Fyrstu skrefin þín inn í Frontier hafa verið skráð.',
+    },
+    2: {
+      title: 'Geiraaðgerðamaður',
+      description: 'Virk nærvera þín yfir mörg svið hefur verið staðfest.',
+    },
+    3: {
+      title: 'Tómsvörður',
+      description: 'Reyndur aðgerðamaður með sannprófanlega bardaga- og könnunarskrá.',
+    },
+    4: {
+      title: 'Framsveitarstjórnandi',
+      description: 'Leiðir af fremstu víglínu. Afrek ná yfir bardaga, flutninga og innviði.',
+    },
+    5: {
+      title: 'Tilvonandi stríðsherra',
+      description: 'Vaxandi afl með feril sem vekur virðingu í hvaða flota sem er.',
+    },
+    6: {
+      title: 'Frontier marskálkur',
+      description: 'Hertur í bardaga og staðfestur á keðju. Frontier man eftir því.',
+    },
+    7: {
+      title: 'Æðsti fullvaldur',
+      description: 'Algjör yfirráð yfir öllum sviðum Frontier. Óumdeilanlegt.',
+    },
+  },
+} as const
+
 const resolveLocale = (locale?: string) =>
   locale === 'zh-CN' || locale === 'is' ? locale : 'en'
+
+const getLocalizedRankCopy = (rank: CombatRank, locale?: string) => {
+  const resolvedLocale = resolveLocale(locale)
+
+  if (resolvedLocale === 'zh-CN') {
+    return {
+      secondaryTitle: rank.titleZh,
+      description: RANK_COPY['zh-CN'][rank.tier].description,
+    }
+  }
+
+  if (resolvedLocale === 'is') {
+    return {
+      secondaryTitle: RANK_COPY.is[rank.tier].title,
+      description: RANK_COPY.is[rank.tier].description,
+    }
+  }
+
+  return {
+    secondaryTitle: rank.titleZh,
+    description: rank.description,
+  }
+}
 
 const getWarriorShareCopy = (locale?: string) => {
   switch (resolveLocale(locale)) {
@@ -137,6 +233,7 @@ const getWarriorShareCopy = (locale?: string) => {
           verified: '已在 Sui 验证',
           walletUnavailable: '钱包不可用',
           unknownWallet: '未知钱包',
+          wallet: '钱包',
           combatScore: '战斗分数',
           network: '网络',
           medalsBound: '已绑定勋章',
@@ -152,8 +249,8 @@ const getWarriorShareCopy = (locale?: string) => {
         fallbackTitle: 'Warrior Profile',
         fallbackTitleZh: 'Warrior prófíll',
         fallbackDescription: 'Keðjustaðfest Frontier auðkenni er að hlaðast eða ekki tiltækt.',
-        snapshotUnavailable: 'Snapshot ófáanlegt',
-        metaAlt: 'Warrior profile share card',
+        snapshotUnavailable: 'Skyndimynd ófáanleg',
+        metaAlt: 'Warrior prófíl deilingarspjald',
         deepScan: 'Djúp skönnun',
         previewScan: 'Forskoðunarskönnun',
         fullSet: 'FULLT SETT',
@@ -167,14 +264,15 @@ const getWarriorShareCopy = (locale?: string) => {
           verified: 'Staðfest á Sui',
           walletUnavailable: 'Veski ófáanlegt',
           unknownWallet: 'Óþekkt veski',
-          combatScore: 'Combat Score',
-          network: 'Network',
-          medalsBound: 'Medals Bound',
-          character: 'Character',
-          medalPreview: 'Medal Preview',
-          noMedals: 'No medal snapshot is available yet.',
-          qrAlt: 'Warrior profile QR code',
-          qrHint: 'Scan to open the warrior profile',
+          wallet: 'Veski',
+          combatScore: 'Bardagastig',
+          network: 'Net',
+          medalsBound: 'Bundnar medalíur',
+          character: 'Persóna',
+          medalPreview: 'Medalíuforskoðun',
+          noMedals: 'Engin medalíuskyndimynd er tiltæk enn.',
+          qrAlt: 'QR-kóði Warrior prófíls',
+          qrHint: 'Skannaðu til að opna Warrior prófílinn',
         },
       }
     default:
@@ -197,6 +295,7 @@ const getWarriorShareCopy = (locale?: string) => {
           verified: 'Verified on Sui',
           walletUnavailable: 'Wallet unavailable',
           unknownWallet: 'Unknown Wallet',
+          wallet: 'Wallet',
           combatScore: 'Combat Score',
           network: 'Network',
           medalsBound: 'Medals Bound',
@@ -248,6 +347,7 @@ export const buildWarriorShareCardModel = async (
   const copy = getWarriorShareCopy(locale)
   const { medals, profile, warriorScore } = snapshot
   const { rank } = warriorScore
+  const rankCopy = getLocalizedRankCopy(rank, locale)
   const medalCount = `${warriorScore.claimedMedalCount} / ${medals.length}`
   const shareUrl = toAbsoluteSiteUrl(
     buildWarriorSharePath(profile.walletAddress, network, { locale })
@@ -256,8 +356,8 @@ export const buildWarriorShareCardModel = async (
 
   return {
     title: rank.title,
-    titleZh: rank.titleZh,
-    description: rank.description,
+    titleZh: rankCopy.secondaryTitle,
+    description: rankCopy.description,
     labels: copy.labels,
     shareUrl,
     qrCodeDataUrl,
@@ -327,6 +427,7 @@ export const buildWarriorPageMetadata = ({
   const resolvedLocale = resolveLocale(locale)
   const copy = getWarriorShareCopy(resolvedLocale)
   const { rank, displayScore, claimedMedalCount } = snapshot.warriorScore
+  const rankCopy = getLocalizedRankCopy(rank, resolvedLocale)
   const shortWallet = formatWalletAddress(
     walletAddress,
     copy.labels.unknownWallet
@@ -347,15 +448,15 @@ export const buildWarriorPageMetadata = ({
   )
   const description =
     resolvedLocale === 'zh-CN'
-      ? `Combat Score: ${displayScore.toLocaleString()} / 10,000 · ${claimedMedalCount} 枚勋章已绑定 · ${shortWallet}`
+      ? `战斗分数：${displayScore.toLocaleString()} / 10,000 · ${claimedMedalCount} 枚勋章已绑定 · ${shortWallet}`
       : resolvedLocale === 'is'
-        ? `Combat Score: ${displayScore.toLocaleString()} / 10,000 · ${claimedMedalCount} medalíur bundnar · ${shortWallet}`
+        ? `Bardagastig: ${displayScore.toLocaleString()} / 10,000 · ${claimedMedalCount} medalíur bundnar · ${shortWallet}`
         : `Combat Score: ${displayScore.toLocaleString()} / 10,000 · ${claimedMedalCount} Medal${claimedMedalCount !== 1 ? 's' : ''} Bound · ${shortWallet}`
   const ogDescription =
     resolvedLocale === 'zh-CN'
-      ? `Combat Score: ${displayScore.toLocaleString()} / 10,000 · ${claimedMedalCount} 枚勋章已在 Sui ${network.toUpperCase()} 绑定`
+      ? `战斗分数：${displayScore.toLocaleString()} / 10,000 · ${claimedMedalCount} 枚勋章已在 Sui ${network.toUpperCase()} 绑定`
       : resolvedLocale === 'is'
-        ? `Combat Score: ${displayScore.toLocaleString()} / 10,000 · ${claimedMedalCount} medalíur bundnar á Sui ${network.toUpperCase()}`
+        ? `Bardagastig: ${displayScore.toLocaleString()} / 10,000 · ${claimedMedalCount} medalíur bundnar á Sui ${network.toUpperCase()}`
         : `Combat Score: ${displayScore.toLocaleString()} / 10,000 · ${claimedMedalCount} Medal${claimedMedalCount !== 1 ? 's' : ''} Bound on Sui ${network.toUpperCase()}`
 
   return {
@@ -367,7 +468,7 @@ export const buildWarriorPageMetadata = ({
     openGraph: {
       type: 'website',
       url: canonicalUrl,
-      title: `${rank.title} (${rank.titleZh}) — ${APP_NAME}`,
+      title: `${rank.title} (${rankCopy.secondaryTitle}) — ${APP_NAME}`,
       description: ogDescription,
       siteName: APP_NAME,
       images: [

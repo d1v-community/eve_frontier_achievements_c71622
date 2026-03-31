@@ -109,26 +109,15 @@ export const buildMedalImagePath = (
   return `${localePrefix}/warrior/${walletAddress}/medals/${slug}/${variant}-image?${buildWarriorQueryString(network, options)}`
 }
 
-// ─── Per-medal share text ─────────────────────────────────────────────────────
-// Fits comfortably within X's 280-char limit after the URL is appended.
-
-const MEDAL_SHARE_TEXT_IS: Record<MedalSlug, string> = {
-  'bloodlust-butcher':
-    '5 staðfest dráp, öll skráð. Bloodlust Butcher medalían er nú soul-bound við veskið mitt. #EVEFrontier #FrontierChronicle',
-  'void-pioneer':
-    'Innviðir reistir í tóminu og varðveittir á Sui. Void Pioneer sýnir hver byggði fyrst í Frontier. #EVEFrontier #FrontierChronicle',
-  'galactic-courier':
-    '10 gate jumps, öll skráð. Flutningaslóðir Frontier eru nú bundnar á keðju sem Galactic Courier medalían. #EVEFrontier #FrontierChronicle',
-  'turret-sentry':
-    'Turnar settir upp, jaðarinn læstur. Turret Sentry er nú soul-bound á Sui sem sönnun þess að ég hélt þessari stöðu. #EVEFrontier #FrontierChronicle',
-  'assembly-pioneer':
-    'Smart Assembly komið online. Þrjú infrastructure interactions eru nú varðveitt sem Assembly Pioneer medalía á Sui. #EVEFrontier #FrontierChronicle',
-  'turret-anchor':
-    'Turnar ankraðir. Svæði merkt. Turret Anchor medalían skilur eftir sannprófanlega kröfu í Frontier. #EVEFrontier #FrontierChronicle',
-  'ssu-trader':
-    '5 SSU trade operations, keðjuskráðar. SSU Trader medalían sýnir hver heldur mörkuðunum gangandi. #EVEFrontier #FrontierChronicle',
-  'fuel-feeder':
-    'Hnútar lifa vegna þess að einhver heldur þeim eldsneytisfylltum. 5 fuel ops skráðar. Fuel Feeder er nú bundin á keðju. #EVEFrontier #FrontierChronicle',
+const RANK_SHARE_SUBTITLE_IS: Record<string, string> = {
+  'Void Drifter': 'Rekandi tómsins',
+  'Frontier Recruit': 'Frontier nýliði',
+  'Sector Operative': 'Geiraaðgerðamaður',
+  'Void Ranger': 'Tómsvörður',
+  'Command Vanguard': 'Framsveitarstjórnandi',
+  'Warlord Aspirant': 'Tilvonandi stríðsherra',
+  'Frontier Marshal': 'Frontier marskálkur',
+  'Apex Sovereign': 'Æðsti fullvaldur',
 }
 
 /**
@@ -140,14 +129,28 @@ export const generateMedalShareText = (
   subtitle: string,
   locale: string = 'en'
 ): string =>
-  (locale === 'is'
-    ? MEDAL_SHARE_TEXT_IS[slug]
-    : getMedalLoreBySlug(slug, resolveMedalLoreLocale(locale)).shareNarrative) ??
+  getMedalLoreBySlug(slug, resolveMedalLoreLocale(locale)).shareNarrative ??
   (locale === 'zh-CN'
     ? `${subtitle} 已在 Frontier Chronicle 中完成链上绑定。#EVEFrontier #FrontierChronicle`
     : locale === 'is'
-      ? `${subtitle} er nú bundin á keðju í Frontier Chronicle. #EVEFrontier #FrontierChronicle`
+      ? `${subtitle} er nú bundin á keðju í Frontier Chronicle á Sui. #EVEFrontier #FrontierChronicle`
       : `${subtitle} is chain-bound in Frontier Chronicle on Sui. #EVEFrontier #FrontierChronicle`)
+
+export const getLocalizedWarriorRankSubtitle = ({
+  locale,
+  rankTitle,
+  rankTitleZh,
+}: {
+  locale: string
+  rankTitle: string
+  rankTitleZh: string
+}) => {
+  if (locale === 'is') {
+    return RANK_SHARE_SUBTITLE_IS[rankTitle] ?? rankTitleZh
+  }
+
+  return rankTitleZh
+}
 
 export const generateWarriorShareText = ({
   locale,
@@ -166,13 +169,19 @@ export const generateWarriorShareText = ({
   totalMedalCount: number
   network: ENetwork
 }) => {
+  const rankSubtitle = getLocalizedWarriorRankSubtitle({
+    locale,
+    rankTitle,
+    rankTitleZh,
+  })
+
   if (locale === 'zh-CN') {
-    return `${rankTitle}（${rankTitleZh}）· Combat Score ${score.toLocaleString()} · ${claimedMedalCount}/${totalMedalCount} 枚勋章已在 Sui ${network.toUpperCase()} 上绑定。`
+    return `${rankTitle}（${rankSubtitle}）· 战斗分数 ${score.toLocaleString()} · ${claimedMedalCount}/${totalMedalCount} 枚勋章已在 Sui ${network.toUpperCase()} 上绑定。`
   }
 
   if (locale === 'is') {
-    return `${rankTitle} (${rankTitleZh}) · Combat Score ${score.toLocaleString()} · ${claimedMedalCount}/${totalMedalCount} medalíur bundnar á Sui ${network.toUpperCase()}.`
+    return `${rankTitle} (${rankSubtitle}) · Bardagastig ${score.toLocaleString()} · ${claimedMedalCount}/${totalMedalCount} medalíur bundnar á Sui ${network.toUpperCase()}.`
   }
 
-  return `${rankTitle} (${rankTitleZh}) · Combat Score ${score.toLocaleString()} · ${claimedMedalCount}/${totalMedalCount} medals bound in Frontier Chronicle on Sui ${network.toUpperCase()}.`
+  return `${rankTitle} (${rankSubtitle}) · Combat Score ${score.toLocaleString()} · ${claimedMedalCount}/${totalMedalCount} medals bound in Frontier Chronicle on Sui ${network.toUpperCase()}.`
 }
