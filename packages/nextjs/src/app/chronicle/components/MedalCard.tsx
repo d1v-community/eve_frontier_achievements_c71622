@@ -72,6 +72,7 @@ const MedalCard = ({
   const lore = getMedalLoreBySlug(medal.slug, locale)
   const hasSecondaryTitle = medal.title !== medal.subtitle
   const emptyEvidenceLabel = getInsufficientEvidenceLabel(locale)
+  const isDemoMinted = medal.claimOrigin === 'demo-mint'
 
   const status = medal.claimed
     ? t('status.bound')
@@ -82,7 +83,9 @@ const MedalCard = ({
         : t('status.tracking')
 
   const statusDetail = medal.claimed
-    ? t('detail.bound')
+    ? isDemoMinted
+      ? t('detail.demoMintBound')
+      : t('detail.bound')
     : medal.claimable
       ? t('detail.claimReady')
       : medal.unlocked
@@ -115,6 +118,11 @@ const MedalCard = ({
           <span className="bg-black/14 text-white/68 border border-white/10 px-3 py-1 font-mono text-[0.62rem] uppercase tracking-[0.22em]">
             {status}
           </span>
+          {isDemoMinted ? (
+            <span className="border border-[#7ec38f]/28 bg-[#7ec38f]/10 px-3 py-1 font-mono text-[0.62rem] uppercase tracking-[0.22em] text-[#d7f0dd]">
+              {t('status.demoMint')}
+            </span>
+          ) : null}
         </div>
       </div>
 

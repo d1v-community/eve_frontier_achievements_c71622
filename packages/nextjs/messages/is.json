@@ -612,14 +612,16 @@
     },
     "toast": {
       "newClaimable": "Ný afrek á keðju eru tilbúin til innlausnar.",
-      "mockMintReady": "Galactic Courier hermimyntun lokið. Deildu næst."
+      "mockMintReady": "Galactic Courier hermimyntun lokið. Deildu næst.",
+      "demoMintSuccess": "Testnet demo mint lokið. Haltu áfram í deilinguna næst."
     },
     "errors": {
       "missingMedalConfig": "Medalíuuppsetning vantar",
       "packageMissing": "Núverandi net hefur engan skilgreindan medalíupakka",
       "registryMissing": "Samnýtt medalíuskrá hefur ekki enn fundist",
       "claimTicketMissing": "Þetta afrek hefur ekki gildan innlausnarmiða",
-      "templateMissing": "Þessi medalía hefur ekkert virkt sniðmát á keðju"
+      "templateMissing": "Þessi medalía hefur ekkert virkt sniðmát á keðju",
+      "demoMintFailed": "Demo mint mistókst. Reyndu aftur eftir smá stund."
     },
     "connect": {
       "eyebrow": "Chronicle stjórnpallur",
@@ -710,6 +712,46 @@
       "body": "Byrjaðu í Tilbúið til innlausnar svo medalíur sem þegar uppfylla skilyrði sitji ekki auðar.",
       "cta": "Opna innlausnarröð"
     },
+    "demoMintPrompt": {
+      "eyebrow": "hackathon varaleið",
+      "title": "Engar lifandi innlausnir enn. Demo-mintaðu eina medalíu og haltu upptökunni áfram.",
+      "body": "Þetta veski hefur engar lifandi innlausnarhæfar medalíur núna, en á testnet er samt hægt að minta eina úr {count} virkum sniðmátum svo hægt sé að sýna bindingu og deilingu áfram.",
+      "cta": "Demo-minta eina medalíu",
+      "hint": "Aðeins á testnet"
+    },
+    "demoMintDialog": {
+      "eyebrow": "testnet demo mint",
+      "title": "Veldu eina medalíu fyrir tímabundna demo-myntun",
+      "body": "Hér eru virku medalíusniðmátin á keðju sem þetta veski á ekki enn. Eftir val mun demo-admin á þjóninum senda raunverulega testnet `admin_mint` fyrir hönd þessa veskis.",
+      "close": "Loka",
+      "selected": "Valið",
+      "submitting": "Sendi demo mint...",
+      "previewEyebrow": "demo forskoðun",
+      "sections": {
+        "progress": "núverandi raunframvinda",
+        "evidence": "núverandi raunvottorð"
+      },
+      "noteEyebrow": "athugið",
+      "note": "Þetta er Hackathon Demo Mint. Það bindur aðeins testnet medalíu við núverandi veski og býr ekki til falsaða Chronicle framvindu eða sönnun.",
+      "confirm": "Staðfesta Demo Mint",
+      "cancel": "Hætta við"
+    },
+    "demoMintSuccess": {
+      "eyebrow": "hackathon demo mint",
+      "title": "Testnet demo mint lokið",
+      "body": "{medalTitle} er nú bundin við núverandi veski með Hackathon Demo Mint. Næst er hægt að halda áfram í deilingarflæðið.",
+      "close": "Loka",
+      "fields": {
+        "medal": "Medalía",
+        "digest": "Færsluyfirlit"
+      },
+      "noteEyebrow": "athugið",
+      "note": "Á þessum skjá er medalían skýrð sem demo-myntuð. Þegar þú heldur áfram í deilingu birtist niðurstaðan sem venjuleg testnet medalíusíða án auka demo merkis.",
+      "actions": {
+        "share": "Halda áfram í deilingu",
+        "explorer": "Skoða Explorer"
+      }
+    },
     "manifest": {
       "eyebrow": "flugmannsyfirlit",
       "wallet": "Veski",
@@ -766,10 +808,12 @@
         "verified": "Staðfest",
         "tracking": "Í rekstri",
         "awaitChain": "Bíður keðju",
-        "locked": "Læst"
+        "locked": "Læst",
+        "demoMint": "Demo Mint"
       },
       "detail": {
         "bound": "Þessi medalía er þegar bundin við núverandi veski.",
+        "demoMintBound": "Þessi medalía var bundin með Hackathon Demo Mint. Framvindan og sönnunin hér að neðan eru áfram raunverulegt Chronicle skráð ástand.",
         "mintReady": "Viðmiðinu er náð. Opin myntun er tiltæk núna, svo hægt er að skrifa þessa medalíu beint í veskið.",
         "claimReady": "Viðmiðinu er náð. Innlausnarleiðin á keðju er virk og tilbúin til keyrslu.",
         "verified": "Viðmiðið er þegar uppfyllt, en bindileiðin á keðju er ekki orðin virk enn.",

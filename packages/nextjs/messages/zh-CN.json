@@ -615,14 +615,16 @@
     },
     "toast": {
       "newClaimable": "发现新的链上成就，可以立即领取。",
-      "mockMintReady": "Galactic Courier 已完成 mock mint，下一步直接分享。"
+      "mockMintReady": "Galactic Courier 已完成 mock mint，下一步直接分享。",
+      "demoMintSuccess": "Testnet Demo Mint 已完成，继续去分享页。"
     },
     "errors": {
       "missingMedalConfig": "勋章配置缺失",
       "packageMissing": "当前网络没有配置 medals package",
       "registryMissing": "还没有发现共享 medal registry",
       "claimTicketMissing": "这个成就没有有效的 claim ticket",
-      "templateMissing": "这枚勋章当前没有可用的链上模板"
+      "templateMissing": "这枚勋章当前没有可用的链上模板",
+      "demoMintFailed": "临时演示 Mint 失败，请稍后重试。"
     },
     "connect": {
       "eyebrow": "chronicle command deck",
@@ -713,6 +715,46 @@
       "body": "先去看 Ready To Claim 区域，别让已经达标的勋章躺着发霉。",
       "cta": "打开领取队列"
     },
+    "demoMintPrompt": {
+      "eyebrow": "hackathon fallback",
+      "title": "没扫出可领取也别卡住，先临时演示 Mint 一枚。",
+      "body": "当前钱包暂时没有真实可领取勋章，但 testnet 仍可从 {count} 枚活跃模板里挑一枚做 Hackathon Demo Mint，方便继续演示绑定和分享链路。",
+      "cta": "临时演示 Mint 一枚",
+      "hint": "仅用于 testnet 演示"
+    },
+    "demoMintDialog": {
+      "eyebrow": "testnet demo mint",
+      "title": "挑一枚勋章做临时演示 Mint",
+      "body": "这里展示的是当前链上仍处于 active 状态、且这个钱包尚未持有的勋章。选中后会由服务端 demo admin 代为发起真实 testnet `admin_mint`。",
+      "close": "关闭",
+      "selected": "已选中",
+      "submitting": "Mint 提交中...",
+      "previewEyebrow": "演示预览",
+      "sections": {
+        "progress": "当前真实进度",
+        "evidence": "当前真实证据"
+      },
+      "noteEyebrow": "说明",
+      "note": "这次是 Hackathon Demo Mint，只负责把 testnet 勋章绑定到当前钱包，不会伪造 Chronicle 的真实进度和证据。",
+      "confirm": "确认 Demo Mint",
+      "cancel": "取消"
+    },
+    "demoMintSuccess": {
+      "eyebrow": "hackathon demo mint",
+      "title": "Testnet Demo Mint 已完成",
+      "body": "{medalTitle} 已通过 Hackathon Demo Mint 绑定到当前钱包。接下来可以继续去分享页，把这次演示接力出去。",
+      "close": "关闭",
+      "fields": {
+        "medal": "勋章",
+        "digest": "交易摘要"
+      },
+      "noteEyebrow": "提示",
+      "note": "这里只说明这枚勋章是通过 Demo Mint 完成绑定。进入分享页后，会按正常 testnet 成果页继续展示，不额外打 demo 标签。",
+      "actions": {
+        "share": "继续分享",
+        "explorer": "查看 Explorer"
+      }
+    },
     "manifest": {
       "eyebrow": "pilot manifest",
       "wallet": "钱包",
@@ -769,10 +811,12 @@
         "verified": "已验证",
         "tracking": "追踪中",
         "awaitChain": "等待上链",
-        "locked": "未解锁"
+        "locked": "未解锁",
+        "demoMint": "Demo Mint"
       },
       "detail": {
         "bound": "这枚勋章已经绑定到当前钱包。",
+        "demoMintBound": "这枚勋章已通过 Hackathon Demo Mint 绑定到当前钱包；下面展示的进度与证据仍然是 Chronicle 当前真实索引结果。",
         "mintReady": "门槛已经满足，现在可以直接走 public mint，把勋章写进钱包。",
         "claimReady": "门槛已经满足，链上 claim 通道已经就绪，可以直接执行。",
         "verified": "门槛已经到位，但当前链上绑定路径还没激活。",

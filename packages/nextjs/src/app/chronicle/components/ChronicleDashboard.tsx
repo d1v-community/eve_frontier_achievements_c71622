@@ -29,7 +29,10 @@ import {
 import { notification } from '~~/helpers/notification'
 import { packageUrl, transactionUrl } from '~~/helpers/network'
 import useNetworkConfig from '~~/hooks/useNetworkConfig'
-import type { ChronicleMedalState } from '../types'
+import type {
+  ChronicleDemoMintCandidate,
+  ChronicleMedalState,
+} from '../types'
 import useChronicleSnapshot from '../hooks/useChronicleSnapshot'
 import { prepareClaimMedalTransaction } from '../helpers/transactions'
 import { getMedalLoreBySlug } from '../config/medalLore'
@@ -42,11 +45,14 @@ import {
 } from '../mock/mockTransaction'
 import { ENetwork } from '~~/types/ENetwork'
 import MedalCard from './MedalCard'
+import DemoMintDialog from './DemoMintDialog'
+import DemoMintSuccessDialog from './DemoMintSuccessDialog'
 import MockWalletConfirmDialog from './MockWalletConfirmDialog'
 import MedalShareDialog from '~~/warrior/[walletAddress]/components/MedalShareDialog'
 
 type EvidenceTone = 'martian' | 'amber' | 'steel'
 type MedalGroup = {
+  key: 'ready' | 'progress' | 'bound'
   title: string
   description: string
   medals: ChronicleMedalState[]
@@ -57,11 +63,38 @@ type PendingMockAction = {
   medal: ChronicleMedalState
   receipt: MockMedalTxReceipt
 } | null
+type DemoMintSuccessState = {
+  digest: string
+  medal: ChronicleMedalState
+} | null
 
 const DEMO_SPOTLIGHT_SLUG = 'galactic-courier'
 
 const truncateMiddle = (value: string, prefix = 8, suffix = 6) =>
   `${value.slice(0, prefix)}...${value.slice(-suffix)}`
+
+const buildDemoMintedMedal = (
+  candidate: ChronicleDemoMintCandidate
+): ChronicleMedalState => ({
+  kind: candidate.kind,
+  slug: candidate.slug,
+  title: candidate.title,
+  subtitle: candidate.subtitle,
+  rarity: candidate.rarity,
+  requirement: candidate.requirement,
+  teaser: candidate.teaser,
+  unlocked: candidate.progressCurrent >= candidate.progressTarget,
+  claimed: true,
+  claimable: false,
+  progressCurrent: candidate.progressCurrent,
+  progressTarget: candidate.progressTarget,
+  progressPercent: candidate.progressPercent,
+  progressLabel: candidate.progressLabel,
+  proof: candidate.proof,
+  templateObjectId: candidate.templateObjectId,
+  claimTicket: null,
+  claimOrigin: 'demo-mint',
+})
 
 const formatTimestamp = (
   value: string | null,
@@ -140,6 +173,14 @@ const ChronicleDashboard = ({
   const [notificationId, setNotificationId] = useState<string>()
   const [claimingSlug, setClaimingSlug] = useState<string | null>(null)
   const [shareSlug, setShareSlug] = useState<string | null>(null)
+  const [shareMedalOverride, setShareMedalOverride] =
+    useState<ChronicleMedalState | null>(null)
+  const [demoMintDialogOpen, setDemoMintDialogOpen] = useState(false)
+  const [demoMintSubmittingSlug, setDemoMintSubmittingSlug] = useState<
+    string | null
+  >(null)
+  const [demoMintSuccess, setDemoMintSuccess] =
+    useState<DemoMintSuccessState>(null)
   const [mockTransactions, setMockTransactions] = useState<
     Record<string, MockMedalTxReceipt>
   >({})
@@ -211,6 +252,14 @@ const ChronicleDashboard = ({
     notification.success(t('toast.newClaimable'))
     announcedClaimablesRef.current = claimableKey
   }, [data, isMockMode, t])
+
+  useEffect(() => {
+    if (data?.demoMint?.candidates.length) {
+      return
+    }
+
+    setDemoMintDialogOpen(false)
+  }, [data?.demoMint?.candidates.length])
 
   const runMockMedalFlow = async (
     medal: ChronicleMedalState,
@@ -329,6 +378,53 @@ const ChronicleDashboard = ({
     )
   }
 
+  const handleDemoMintConfirm = async (
+    candidate: ChronicleDemoMintCandidate
+  ) => {
+    if (!currentAccount) {
+      return
+    }
+
+    setDemoMintSubmittingSlug(candidate.slug)
+
+    try {
+      const response = await fetch('/api/chronicle/demo-mint', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          walletAddress: currentAccount.address,
+          network: network ?? ENetwork.TESTNET,
+          medalSlug: candidate.slug,
+        }),
+      })
+      const payload = await response.json()
+
+      if (!response.ok || typeof payload?.digest !== 'string') {
+        throw new Error(
+          typeof payload?.error === 'string'
+            ? payload.error
+            : t('errors.demoMintFailed')
+        )
+      }
+
+      setDemoMintDialogOpen(false)
+      setDemoMintSuccess({
+        digest: payload.digest,
+        medal: buildDemoMintedMedal(candidate),
+      })
+      notification.success(t('toast.demoMintSuccess'))
+      refetch()
+    } catch (error) {
+      notification.error(
+        error instanceof Error ? error : new Error(t('errors.demoMintFailed'))
+      )
+    } finally {
+      setDemoMintSubmittingSlug(null)
+    }
+  }
+
   if (!currentAccount) {
     return (
       <section className="mx-auto flex w-full max-w-7xl flex-col gap-6 px-4 py-2">
@@ -404,21 +500,25 @@ const ChronicleDashboard = ({
   const inProgressMedals = sortMedals(
     data.medals.filter((medal) => !medal.claimable && !medal.claimed)
   )
+  const demoMintCandidates = data.demoMint?.candidates ?? []
 
   const medalGroups: MedalGroup[] = [
     {
+      key: 'ready',
       title: t('groups.ready.title'),
       description: t('groups.ready.description'),
       medals: claimableMedals,
       emptyText: t('groups.ready.empty'),
     },
     {
+      key: 'progress',
       title: t('groups.progress.title'),
       description: t('groups.progress.description'),
       medals: inProgressMedals,
       emptyText: t('groups.progress.empty'),
     },
     {
+      key: 'bound',
       title: t('groups.bound.title'),
       description: t('groups.bound.description'),
       medals: claimedMedals,
@@ -429,14 +529,19 @@ const ChronicleDashboard = ({
   const infrastructureComplete =
     data.metrics.networkNodeAnchors >= 1 || data.metrics.storageUnitAnchors >= 3
   const shareMedal =
-    shareSlug == null
+    shareMedalOverride ??
+    (shareSlug == null
       ? null
-      : (data.medals.find((medal) => medal.slug === shareSlug) ?? null)
+      : (data.medals.find((medal) => medal.slug === shareSlug) ?? null))
   const priorityLoreMedals = data.medals
     .filter(
       (medal) => getMedalLoreBySlug(medal.slug, locale).priority === 'primary'
     )
     .slice(0, 3)
+  const demoMintExplorerUrl =
+    demoMintSuccess?.digest != null
+      ? transactionUrl(explorerUrl, demoMintSuccess.digest)
+      : null
 
   return (
     <section className="mx-auto flex w-full max-w-7xl flex-col gap-6 px-4 py-2">
@@ -747,12 +852,8 @@ const ChronicleDashboard = ({
 
       {medalGroups.map((group) => (
         <section
-          key={group.title}
-          id={
-            group.title === t('groups.ready.title')
-              ? 'ready-to-claim'
-              : undefined
-          }
+          key={group.key}
+          id={group.key === 'ready' ? 'ready-to-claim' : undefined}
           className="flex flex-col gap-4"
         >
           <div className="flex flex-col gap-2">
@@ -778,12 +879,48 @@ const ChronicleDashboard = ({
                     mockTransaction={mockTransactions[medal.slug] ?? null}
                     mockReceipt={mockReceipts[medal.slug] ?? null}
                     onShare={
-                      medal.claimed ? () => setShareSlug(medal.slug) : null
+                      medal.claimed
+                        ? () => {
+                            setShareMedalOverride(null)
+                            setShareSlug(medal.slug)
+                          }
+                        : null
                     }
                     onAction={() => handleClaim(medal.slug)}
                   />
                 )
               })}
+            </div>
+          ) : group.key === 'ready' && demoMintCandidates.length > 0 ? (
+            <div className="border border-[#7ec38f]/26 bg-[linear-gradient(135deg,rgba(126,195,143,0.12),rgba(10,10,11,0.94))] px-5 py-5 shadow-[0_24px_80px_rgba(0,0,0,0.18)]">
+              <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
+                <div className="max-w-3xl">
+                  <div className="font-mono text-[0.62rem] uppercase tracking-[0.32em] text-[#a9e2b5]">
+                    {t('demoMintPrompt.eyebrow')}
+                  </div>
+                  <div className="mt-3 font-display text-3xl uppercase tracking-[0.08em] text-[#f4efe2]">
+                    {t('demoMintPrompt.title')}
+                  </div>
+                  <p className="mt-4 text-sm leading-7 text-[#f4efe2]/70">
+                    {t('demoMintPrompt.body', {
+                      count: demoMintCandidates.length,
+                    })}
+                  </p>
+                </div>
+
+                <div className="flex shrink-0 flex-col gap-3">
+                  <EveButton
+                    typeClass="primary"
+                    className="!min-w-[13rem] !self-auto"
+                    onClick={() => setDemoMintDialogOpen(true)}
+                  >
+                    {t('demoMintPrompt.cta')}
+                  </EveButton>
+                  <div className="font-mono text-[0.58rem] uppercase tracking-[0.2em] text-white/46">
+                    {t('demoMintPrompt.hint')}
+                  </div>
+                </div>
+              </div>
             </div>
           ) : (
             <div className="bg-black/14 text-[#f4efe2]/66 border border-white/10 px-5 py-5 text-sm leading-7">
@@ -793,6 +930,32 @@ const ChronicleDashboard = ({
         </section>
       ))}
 
+      <DemoMintDialog
+        open={demoMintDialogOpen}
+        candidates={demoMintCandidates}
+        submittingSlug={demoMintSubmittingSlug}
+        onClose={() => setDemoMintDialogOpen(false)}
+        onConfirm={(candidate) => void handleDemoMintConfirm(candidate)}
+      />
+
+      <DemoMintSuccessDialog
+        open={demoMintSuccess != null}
+        digest={demoMintSuccess?.digest ?? null}
+        explorerUrl={demoMintExplorerUrl}
+        medalTitle={demoMintSuccess?.medal.title ?? null}
+        medalSubtitle={demoMintSuccess?.medal.subtitle ?? null}
+        onClose={() => setDemoMintSuccess(null)}
+        onContinueShare={() => {
+          if (!demoMintSuccess) {
+            return
+          }
+
+          setShareMedalOverride(demoMintSuccess.medal)
+          setShareSlug(demoMintSuccess.medal.slug)
+          setDemoMintSuccess(null)
+        }}
+      />
+
       {shareMedal && currentAccount ? (
         <MedalShareDialog
           medal={shareMedal}
@@ -800,7 +963,10 @@ const ChronicleDashboard = ({
           network={network ?? ENetwork.TESTNET}
           isMockMode={isMockMode}
           mockReceipt={shareSlug ? (mockReceipts[shareSlug] ?? null) : null}
-          onClose={() => setShareSlug(null)}
+          onClose={() => {
+            setShareSlug(null)
+            setShareMedalOverride(null)
+          }}
         />
       ) : null}
 

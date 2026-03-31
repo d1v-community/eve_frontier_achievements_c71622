@@ -615,14 +615,16 @@
     },
     "toast": {
       "newClaimable": "New on-chain achievements are ready to claim.",
-      "mockMintReady": "Galactic Courier mock mint complete. Share it next."
+      "mockMintReady": "Galactic Courier mock mint complete. Share it next.",
+      "demoMintSuccess": "Testnet demo mint completed. Continue into sharing next."
     },
     "errors": {
       "missingMedalConfig": "Medal configuration is missing",
       "packageMissing": "Current network has no medals package configured",
       "registryMissing": "Shared medal registry has not been discovered yet",
       "claimTicketMissing": "This achievement does not have a valid claim ticket",
-      "templateMissing": "This medal has no active on-chain template"
+      "templateMissing": "This medal has no active on-chain template",
+      "demoMintFailed": "Demo mint failed. Please try again in a moment."
     },
     "connect": {
       "eyebrow": "chronicle command deck",
@@ -713,6 +715,46 @@
       "body": "Start in Ready To Claim so already-qualified medals do not sit idle.",
       "cta": "Open Claim Queue"
     },
+    "demoMintPrompt": {
+      "eyebrow": "hackathon fallback",
+      "title": "No live claims yet. Demo mint one medal and keep the recording moving.",
+      "body": "This wallet has no live claimable medals right now, but testnet can still mint one from the {count} active templates so you can keep demonstrating binding and sharing.",
+      "cta": "Demo Mint One Medal",
+      "hint": "Testnet only"
+    },
+    "demoMintDialog": {
+      "eyebrow": "testnet demo mint",
+      "title": "Choose one medal for a temporary demo mint",
+      "body": "These are the active on-chain medal templates that this wallet does not own yet. After you choose one, the server-side demo admin will submit a real testnet `admin_mint` on this wallet's behalf.",
+      "close": "Close",
+      "selected": "Selected",
+      "submitting": "Submitting demo mint...",
+      "previewEyebrow": "demo preview",
+      "sections": {
+        "progress": "current live progress",
+        "evidence": "current live evidence"
+      },
+      "noteEyebrow": "note",
+      "note": "This is a Hackathon Demo Mint. It only binds a testnet medal to the current wallet and does not fabricate Chronicle progress or evidence.",
+      "confirm": "Confirm Demo Mint",
+      "cancel": "Cancel"
+    },
+    "demoMintSuccess": {
+      "eyebrow": "hackathon demo mint",
+      "title": "Testnet demo mint completed",
+      "body": "{medalTitle} is now bound to the current wallet through Hackathon Demo Mint. Next up, hand it off to the sharing flow.",
+      "close": "Close",
+      "fields": {
+        "medal": "Medal",
+        "digest": "Transaction Digest"
+      },
+      "noteEyebrow": "note",
+      "note": "This screen explicitly marks the medal as demo minted. Once you continue into the share flow, the result is presented as a normal testnet medal page without extra demo tagging.",
+      "actions": {
+        "share": "Continue Sharing",
+        "explorer": "View Explorer"
+      }
+    },
     "manifest": {
       "eyebrow": "pilot manifest",
       "wallet": "Wallet",
@@ -769,10 +811,12 @@
         "verified": "Verified",
         "tracking": "Tracking",
         "awaitChain": "Await Chain",
-        "locked": "Locked"
+        "locked": "Locked",
+        "demoMint": "Demo Mint"
       },
       "detail": {
         "bound": "This medal is already bound to the current wallet.",
+        "demoMintBound": "This medal was bound through Hackathon Demo Mint. The progress and evidence below remain the real Chronicle indexed state.",
         "mintReady": "Threshold complete. Public mint is available now, so this medal can be written directly into the wallet.",
         "claimReady": "Threshold complete. The on-chain claim path is live and ready to execute.",
         "verified": "The threshold is already satisfied, but the on-chain bind route is not active yet.",
