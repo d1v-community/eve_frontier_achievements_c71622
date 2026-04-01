@@ -195,12 +195,15 @@
     "configNotice": "config notice",
     "runtimeNotice": "runtime notice",
     "previewNotice": "eve eyes preview mode",
+    "demoMintNotice": "hackathon fallback",
     "missingPackageTitle": "No public medals package is configured for this network yet",
     "missingPackageBody": "Activity scanning still works. On-chain claim simply stays disabled until one of these environment variables is configured:",
     "databaseTitle": "Database sync is currently disabled",
     "databaseBody": "Without DATABASE_URL, wallet connections do not sync player profiles into SQL. Scanning and frontend rendering are unaffected.",
     "previewTitle": "The app is sampling from the public indexing window",
-    "previewBody": "Without EVE_EYES_API_KEY, the dashboard scans only the public activity window. Claim logic still works, but deeper history can be incomplete."
+    "previewBody": "Without EVE_EYES_API_KEY, the dashboard scans only the public activity window. Claim logic still works, but deeper history can be incomplete.",
+    "demoMintTitle": "Testnet demo mint fallback is not armed yet",
+    "demoMintBody": "Normal Chronicle claim can still work. But wallets with no qualifying activity will not see the hackathon demo-mint path until CHRONICLE_DEMO_MINTER_PRIVATE_KEY is configured to the testnet AdminCap owner."
   },
   "networkSupport": {
     "label": "network mismatch",

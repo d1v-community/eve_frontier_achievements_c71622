@@ -192,12 +192,15 @@
     "configNotice": "config notice",
     "runtimeNotice": "runtime notice",
     "previewNotice": "eve eyes preview mode",
+    "demoMintNotice": "hackathon fallback",
     "missingPackageTitle": "Enginn opinber medals package er enn stilltur fyrir þetta net",
     "missingPackageBody": "Virkniskönnun virkar samt áfram. On-chain claim er einfaldlega óvirkt þar til ein af þessum umhverfisbreytum er stillt:",
     "databaseTitle": "Database sync is currently disabled",
     "databaseBody": "Án DATABASE_URL samstillast veskjatengingar ekki við leikmannaprófíla í SQL. Skönnun og framendisbirting verða ekki fyrir áhrifum.",
     "previewTitle": "Appið sýnishornar úr opinberum indexing glugga",
-    "previewBody": "Án EVE_EYES_API_KEY skannar mælaborðið aðeins opinbera virkni gluggann. Claim logic virkar enn, en dýpri saga getur verið ófullkomin."
+    "previewBody": "Án EVE_EYES_API_KEY skannar mælaborðið aðeins opinbera virkni gluggann. Claim logic virkar enn, en dýpri saga getur verið ófullkomin.",
+    "demoMintTitle": "Testnet demo mint varaleiðin er ekki tilbúin enn",
+    "demoMintBody": "Venjuleg Chronicle claim getur samt virkað. En veski án gjaldgengrar virkni sjá ekki hackathon demo-mint leiðina fyrr en CHRONICLE_DEMO_MINTER_PRIVATE_KEY er stillt á testnet AdminCap eigandann."
   },
   "networkSupport": {
     "label": "network mismatch",

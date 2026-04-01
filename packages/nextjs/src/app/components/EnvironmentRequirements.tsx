@@ -14,6 +14,9 @@ const CONTRACT_PLACEHOLDER = '0xNOTDEFINED'
 const eveEyesApiKeyConfigured =
   typeof process.env.EVE_EYES_API_KEY === 'string' &&
   process.env.EVE_EYES_API_KEY.trim().length > 0
+const demoMinterConfigured =
+  typeof process.env.CHRONICLE_DEMO_MINTER_PRIVATE_KEY === 'string' &&
+  process.env.CHRONICLE_DEMO_MINTER_PRIVATE_KEY.trim().length > 0
 
 function getConfiguredContractEnvVars() {
   return CONTRACT_ENV_VARS.filter((key) => {
@@ -26,8 +29,18 @@ const EnvironmentRequirements = async () => {
   const t = await getTranslations('environment')
   const configuredContractEnvVars = getConfiguredContractEnvVars()
   const databaseEnabled = hasDatabaseUrl()
+  const testnetContractConfigured = configuredContractEnvVars.includes(
+    'NEXT_PUBLIC_TESTNET_CONTRACT_PACKAGE_ID'
+  )
+  const shouldShowDemoMintNotice =
+    testnetContractConfigured && !demoMinterConfigured
 
-  if (configuredContractEnvVars.length > 0 && databaseEnabled) {
+  if (
+    configuredContractEnvVars.length > 0 &&
+    databaseEnabled &&
+    eveEyesApiKeyConfigured &&
+    !shouldShowDemoMintNotice
+  ) {
     return null
   }
 
@@ -95,6 +108,27 @@ const EnvironmentRequirements = async () => {
           </div>
           <div className="mt-2 leading-7">
             {t('previewBody')}
+          </div>
+        </div>
+      ) : null}
+
+      {shouldShowDemoMintNotice ? (
+        <div className="rounded-[1.4rem] border border-[#7ec38f]/28 bg-[linear-gradient(180deg,rgba(126,195,143,0.12),rgba(10,10,11,0.94))] px-4 py-4 text-sm text-[#d7f0dd] shadow-[0_20px_60px_rgba(0,0,0,0.18)]">
+          <div className="flex items-center gap-2 font-mono text-[0.62rem] uppercase tracking-[0.32em] text-[#a9e2b5]">
+            <Image
+              src={AlertAsset}
+              alt=""
+              width={16}
+              height={16}
+              className="h-4 w-4"
+            />
+            <span>{t('demoMintNotice')}</span>
+          </div>
+          <div className="mt-2 text-base font-semibold">
+            {t('demoMintTitle')}
+          </div>
+          <div className="mt-2 leading-7">
+            {t('demoMintBody')}
           </div>
         </div>
       ) : null}

@@ -195,12 +195,15 @@
     "configNotice": "配置提示",
     "runtimeNotice": "运行态提示",
     "previewNotice": "eve eyes preview mode",
+    "demoMintNotice": "hackathon fallback",
     "missingPackageTitle": "当前网络还没有公开配置 medals package",
     "missingPackageBody": "行为扫描依旧可用，只是链上 Claim 会保持关闭。后面补上这些环境变量即可接回去：",
     "databaseTitle": "数据库同步当前关闭",
     "databaseBody": "没有 DATABASE_URL 时，钱包连接不会把玩家档案同步进 SQL。扫描和前端显示不受影响。",
     "previewTitle": "当前只在公开索引窗口里取样",
-    "previewBody": "没有 EVE_EYES_API_KEY 时，Dashboard 只会扫描公开行为窗口。Claim 逻辑仍然可用，但深历史数据可能不完整。"
+    "previewBody": "没有 EVE_EYES_API_KEY 时，Dashboard 只会扫描公开行为窗口。Claim 逻辑仍然可用，但深历史数据可能不完整。",
+    "demoMintTitle": "Testnet Demo Mint 兜底还没有武装完成",
+    "demoMintBody": "正常 Chronicle claim 依旧可以跑。但如果你要演示“新钱包没有可验证行为时也能继续 mint”，还得先配置 CHRONICLE_DEMO_MINTER_PRIVATE_KEY，并确保它对应 testnet 上持有唯一 AdminCap 的地址。"
   },
   "networkSupport": {
     "label": "网络不匹配",
